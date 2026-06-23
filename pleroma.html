@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PLEROMA — The Crypto Truth Oracle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0a0a;
+    --panel:#141312;
+    --panel-2:#1c1a17;
+    --gold:#F4C430;
+    --gold-2:#FFD95A;
+    --gold-deep:#C99A1E;
+    --paper:#F2ECDC;
+    --mist:#9d978a;
+    --dim:#6f6a5f;
+    --blood:#E5484D;
+    --ink:#0a0a0a;
+    --bw:3px;
+    --hard:6px 6px 0 #000;
+    --hard-gold:6px 6px 0 var(--gold);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);color:var(--paper);
+    font-family:'Space Grotesk',system-ui,sans-serif;font-size:16px;line-height:1.55;
+    -webkit-font-smoothing:antialiased;overflow-x:hidden;
+  }
+  .wrap{max-width:1140px;margin:0 auto;padding:0 clamp(1.1rem,4vw,2.2rem)}
+
+  .display{font-family:'Syne',sans-serif;font-weight:800;text-transform:uppercase;line-height:.96;letter-spacing:-.01em}
+  .mono{font-family:'Space Mono',monospace}
+  .eyebrow{font-family:'Space Mono',monospace;font-size:.72rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
+
+  /* ---------- nav ---------- */
+  header.nav{position:sticky;top:0;z-index:60;background:var(--bg);border-bottom:var(--bw) solid var(--gold)}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:72px}
+  .brand{display:flex;align-items:center;gap:.7rem;text-decoration:none;color:var(--paper)}
+  .brand .box{width:40px;height:40px;border:var(--bw) solid var(--gold);display:flex;align-items:center;justify-content:center;color:var(--gold);background:var(--bg)}
+  .brand .box svg{width:24px;height:24px}
+  .brand .word{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;letter-spacing:.16em;text-transform:uppercase}
+  .nav-links{display:flex;align-items:center;gap:1.8rem}
+  .nav-links a{color:var(--paper);text-decoration:none;font-weight:500;font-size:.86rem;text-transform:uppercase;letter-spacing:.06em;transition:color .15s}
+  .nav-links a:hover{color:var(--gold)}
+  .btn{
+    display:inline-flex;align-items:center;gap:.5rem;cursor:pointer;text-decoration:none;
+    font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.84rem;text-transform:uppercase;letter-spacing:.06em;
+    color:var(--ink);background:var(--gold);border:var(--bw) solid var(--ink);
+    padding:.6rem 1.2rem;box-shadow:var(--hard);transition:transform .12s, box-shadow .12s;
+  }
+  .btn:hover{transform:translate(-2px,-2px);box-shadow:8px 8px 0 #000}
+  .btn:active{transform:translate(3px,3px);box-shadow:2px 2px 0 #000}
+  @media(max-width:760px){.nav-links a:not(.btn){display:none}}
+
+  /* ---------- ticker ---------- */
+  .ticker{background:var(--gold);border-bottom:var(--bw) solid var(--ink);overflow:hidden;white-space:nowrap}
+  .ticker-track{display:inline-block;padding:.5rem 0;animation:slide 24s linear infinite}
+  .ticker span{font-family:'Space Mono',monospace;font-weight:700;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);padding:0 1.5rem}
+  @keyframes slide{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+  /* ---------- hero ---------- */
+  .hero{padding:clamp(2.6rem,6vw,5rem) 0 clamp(2rem,4vw,3.5rem);text-align:center}
+  .emblem-stage{display:flex;justify-content:center;margin-bottom:2rem}
+  .medallion{
+    position:relative;width:clamp(184px,28vw,240px);height:clamp(184px,28vw,240px);
+    border:var(--bw) solid var(--gold);background:var(--bg);box-shadow:var(--hard-gold);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .medallion::before{
+    content:"";position:absolute;inset:10px;border:1px solid var(--gold-deep);opacity:.5;
+  }
+  .emblem{width:78%;height:auto;color:var(--gold);overflow:visible}
+  .emblem .ring-outer{transform-origin:center;animation:spin 120s linear infinite}
+  .emblem .ring-mid{transform-origin:center;animation:spin 80s linear infinite reverse}
+  .emblem .breathe{transform-origin:center;animation:breathe 6s ease-in-out infinite}
+  .emblem path,.emblem circle,.emblem line,.emblem polygon{stroke-dasharray:1400;stroke-dashoffset:1400;animation:draw 2s ease forwards}
+  @keyframes draw{to{stroke-dashoffset:0}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes breathe{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+
+  .hero h1{font-size:clamp(2.5rem,8vw,5.2rem);max-width:13ch;margin:0 auto;color:var(--paper)}
+  .hero h1 .hl{display:inline-block;background:var(--gold);color:var(--ink);padding:0 .2em;border:var(--bw) solid var(--ink);box-shadow:5px 5px 0 #000;transform:rotate(-1.5deg)}
+  .hero .lede{font-size:clamp(1rem,1.7vw,1.16rem);color:var(--mist);max-width:54ch;margin:1.8rem auto 0;line-height:1.6}
+
+  /* ---------- oracle console ---------- */
+  .console{max-width:780px;margin:clamp(2rem,4vw,3rem) auto 0;text-align:left;background:var(--panel);border:var(--bw) solid var(--gold);box-shadow:var(--hard-gold)}
+  .console-bar{display:flex;align-items:center;gap:.7rem;padding:.8rem 1.2rem;background:var(--gold);border-bottom:var(--bw) solid var(--ink)}
+  .console-bar .sq{width:12px;height:12px;background:var(--ink)}
+  .console-bar .label{font-family:'Space Mono',monospace;font-weight:700;font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink)}
+  .console-body{padding:clamp(1.2rem,3vw,1.8rem)}
+
+  .field{display:flex;flex-direction:column;gap:1rem}
+  .field textarea{
+    width:100%;min-height:56px;resize:none;background:var(--bg);border:var(--bw) solid var(--gold-deep);
+    color:var(--paper);font-family:'Space Mono',monospace;font-size:.95rem;line-height:1.5;padding:1rem;transition:border-color .15s}
+  .field textarea::placeholder{color:var(--dim)}
+  .field textarea:focus{outline:none;border-color:var(--gold)}
+  .field-row{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+  .field-note{font-family:'Space Mono',monospace;font-size:.72rem;color:var(--dim);max-width:44ch;line-height:1.5}
+  .reveal{
+    display:inline-flex;align-items:center;gap:.55rem;white-space:nowrap;cursor:pointer;
+    font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.9rem;text-transform:uppercase;letter-spacing:.05em;
+    color:var(--ink);background:var(--gold);border:var(--bw) solid var(--ink);padding:.8rem 1.5rem;box-shadow:var(--hard);
+    transition:transform .12s, box-shadow .12s}
+  .reveal:hover{transform:translate(-2px,-2px);box-shadow:8px 8px 0 #000}
+  .reveal:active{transform:translate(3px,3px);box-shadow:2px 2px 0 #000}
+  .reveal:disabled{opacity:.6;cursor:wait;transform:none;box-shadow:var(--hard)}
+  .reveal svg{width:16px;height:16px}
+
+  .suggest{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.1rem}
+  .suggest button{
+    background:var(--bg);border:var(--bw) solid var(--gold-deep);color:var(--paper);
+    font-family:'Space Mono',monospace;font-size:.76rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
+    padding:.5rem .9rem;cursor:pointer;transition:all .12s}
+  .suggest button:hover{background:var(--gold);color:var(--ink);border-color:var(--ink)}
+
+  .consulting{display:none;align-items:center;gap:.8rem;padding:1.4rem .1rem .2rem}
+  .consulting.on{display:flex}
+  .consulting .blk{width:12px;height:12px;background:var(--gold);animation:blink .9s steps(1) infinite}
+  @keyframes blink{50%{opacity:.2}}
+  .consulting .status{font-family:'Space Mono',monospace;font-weight:700;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--gold)}
+
+  /* ---------- verdict ---------- */
+  .verdict{display:none;margin-top:1.6rem;border:var(--bw) solid var(--gold);background:var(--bg)}
+  .verdict.on{display:block;animation:pop .25s ease}
+  @keyframes pop{from{transform:scale(.985);opacity:.4}to{transform:scale(1);opacity:1}}
+  .verdict.illusion{border-color:var(--blood)}
+  .verdict.veiled{border-color:var(--mist)}
+  .verdict-head{display:flex;align-items:stretch;gap:0;border-bottom:var(--bw) solid var(--gold)}
+  .verdict.illusion .verdict-head{border-color:var(--blood)}
+  .verdict.veiled .verdict-head{border-color:var(--mist)}
+  .verdict-mark{flex-shrink:0;width:66px;display:flex;align-items:center;justify-content:center;background:var(--gold);border-right:var(--bw) solid var(--gold);color:var(--ink)}
+  .verdict.illusion .verdict-mark{background:var(--blood);border-color:var(--blood)}
+  .verdict.veiled .verdict-mark{background:var(--mist);border-color:var(--mist)}
+  .verdict-mark svg{width:32px;height:32px}
+  .verdict-titles{flex:1;min-width:0;padding:.9rem 1.1rem;display:flex;flex-direction:column;justify-content:center}
+  .v-kicker{font-family:'Space Mono',monospace;font-size:.66rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--mist)}
+  .v-title{font-family:'Syne',sans-serif;font-weight:800;text-transform:uppercase;font-size:clamp(1.3rem,3.4vw,1.9rem);line-height:1;margin-top:.25rem;color:var(--gold)}
+  .verdict.illusion .v-title{color:var(--blood)}
+  .verdict.veiled .v-title{color:var(--paper)}
+  .clarity{flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 1.2rem;border-left:var(--bw) solid var(--gold)}
+  .verdict.illusion .clarity{border-color:var(--blood)}
+  .verdict.veiled .clarity{border-color:var(--mist)}
+  .clarity .num{font-family:'Syne',sans-serif;font-weight:800;font-size:2.3rem;line-height:1;color:var(--gold)}
+  .verdict.illusion .clarity .num{color:var(--blood)}
+  .verdict.veiled .clarity .num{color:var(--paper)}
+  .clarity .cap{font-family:'Space Mono',monospace;font-size:.6rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-top:.25rem}
+  @media(max-width:560px){.clarity{display:none}}
+
+  .reading{padding:1.2rem 1.2rem 0;color:var(--paper);font-size:1.02rem;line-height:1.65}
+  .signals{padding:1.2rem;display:flex;flex-direction:column;gap:.7rem}
+  .signal{display:flex;align-items:flex-start;gap:.85rem;padding:.8rem .95rem;border:var(--bw) solid var(--gold-deep);background:var(--panel)}
+  .signal .sicon{flex-shrink:0;width:24px;height:24px;margin-top:.05rem}
+  .signal .sbody{flex:1;min-width:0}
+  .signal .sname{font-weight:700;font-size:.92rem;text-transform:uppercase;letter-spacing:.02em}
+  .signal .snote{color:var(--mist);font-size:.86rem;margin-top:.15rem;line-height:1.5}
+  .signal .sstate{flex-shrink:0;font-family:'Space Mono',monospace;font-weight:700;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;padding:.3rem .55rem;border:2px solid currentColor;margin-top:.1rem}
+  .s-light{border-color:var(--gold)} .s-light .sicon,.s-light .sstate{color:var(--gold)}
+  .s-shadow{border-color:var(--blood)} .s-shadow .sicon,.s-shadow .sstate{color:var(--blood)}
+  .s-unknown{border-color:var(--mist)} .s-unknown .sicon,.s-unknown .sstate{color:var(--mist)}
+  .disclaim{margin:0 1.2rem 1.2rem;font-family:'Space Mono',monospace;font-size:.72rem;color:var(--dim);line-height:1.55;border-top:2px dashed var(--gold-deep);padding-top:1rem}
+
+  /* ---------- sections ---------- */
+  section.block{padding:clamp(3rem,7vw,5.5rem) 0}
+  .sec-head{margin-bottom:clamp(2rem,4vw,3rem)}
+  .sec-head .eyebrow{display:inline-block;background:var(--gold);color:var(--ink);padding:.3rem .7rem;border:var(--bw) solid var(--ink);box-shadow:4px 4px 0 #000;margin-bottom:1.4rem}
+  .sec-head h2{font-size:clamp(2rem,5vw,3.4rem);color:var(--paper);max-width:16ch}
+  .sec-head h2 .u{color:var(--gold)}
+  .sec-head p{color:var(--mist);margin-top:1.1rem;font-size:1.05rem;max-width:54ch}
+
+  /* ---------- reveal grid ---------- */
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem}
+  @media(max-width:860px){.grid{grid-template-columns:repeat(2,1fr)}}
+  @media(max-width:560px){.grid{grid-template-columns:1fr}}
+  .cell{background:var(--panel);border:var(--bw) solid var(--gold);box-shadow:var(--hard-gold);padding:clamp(1.3rem,2.4vw,1.8rem);transition:transform .14s, box-shadow .14s}
+  .cell:hover{transform:translate(-3px,-3px);box-shadow:9px 9px 0 var(--gold)}
+  .cell .iconbox{width:50px;height:50px;border:var(--bw) solid var(--gold);display:flex;align-items:center;justify-content:center;color:var(--gold);margin-bottom:1.1rem}
+  .cell .iconbox svg{width:28px;height:28px}
+  .cell .plain{font-family:'Space Mono',monospace;font-size:.64rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-deep);margin-bottom:.6rem}
+  .cell h3{font-family:'Syne',sans-serif;font-weight:700;text-transform:uppercase;font-size:1.16rem;margin-bottom:.5rem;color:var(--paper)}
+  .cell p{color:var(--mist);font-size:.92rem;line-height:1.55}
+
+  /* ---------- rite ---------- */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem}
+  @media(max-width:760px){.steps{grid-template-columns:1fr}}
+  .step{background:var(--bg);border:var(--bw) solid var(--gold);padding:1.6rem}
+  .step .idx{display:inline-block;font-family:'Space Mono',monospace;font-weight:700;font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);background:var(--gold);padding:.25rem .6rem}
+  .step h3{font-family:'Syne',sans-serif;font-weight:800;text-transform:uppercase;font-size:1.3rem;margin:1rem 0 .5rem;color:var(--paper)}
+  .step p{color:var(--mist);font-size:.95rem;line-height:1.6}
+
+  /* ---------- creed ---------- */
+  .creed{background:var(--gold);border:var(--bw) solid var(--ink);box-shadow:var(--hard);padding:clamp(2.4rem,5vw,4rem) clamp(1.4rem,4vw,3rem);text-align:center}
+  .creed .ib{width:60px;height:60px;border:var(--bw) solid var(--ink);display:flex;align-items:center;justify-content:center;margin:0 auto 1.6rem;color:var(--ink)}
+  .creed .ib svg{width:34px;height:34px}
+  .creed p{font-family:'Syne',sans-serif;font-weight:800;text-transform:uppercase;font-size:clamp(1.5rem,4vw,2.6rem);line-height:1.1;color:var(--ink);max-width:20ch;margin:0 auto}
+  .creed .src{font-family:'Space Mono',monospace;font-weight:700;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-deep);margin-top:1.8rem}
+
+  /* ---------- footer ---------- */
+  footer{border-top:var(--bw) solid var(--gold);padding:clamp(2.4rem,5vw,3.6rem) 0 2.2rem;margin-top:clamp(2rem,4vw,3rem)}
+  .foot-top{display:flex;justify-content:space-between;gap:2rem;flex-wrap:wrap}
+  .foot-brand{max-width:32ch}
+  .foot-brand .word{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;letter-spacing:.16em;text-transform:uppercase;display:flex;align-items:center;gap:.6rem;color:var(--paper)}
+  .foot-brand .word .box{width:32px;height:32px;border:var(--bw) solid var(--gold);display:flex;align-items:center;justify-content:center;color:var(--gold)}
+  .foot-brand .word .box svg{width:20px;height:20px}
+  .foot-brand p{color:var(--mist);font-size:.9rem;margin-top:1rem;line-height:1.6}
+  .foot-cols{display:flex;gap:clamp(2rem,5vw,3.6rem);flex-wrap:wrap}
+  .foot-col h4{font-family:'Space Mono',monospace;font-weight:700;font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem}
+  .foot-col a{display:block;color:var(--mist);text-decoration:none;font-size:.9rem;margin-bottom:.6rem;transition:color .15s}
+  .foot-col a:hover{color:var(--gold)}
+  .foot-bottom{margin-top:clamp(2.2rem,5vw,3rem);padding-top:1.5rem;border-top:2px dashed var(--gold-deep);display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;font-family:'Space Mono',monospace;font-size:.76rem;color:var(--dim);text-transform:uppercase;letter-spacing:.06em}
+
+  a:focus-visible,button:focus-visible,textarea:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+
+  @media(prefers-reduced-motion:reduce){
+    *{animation:none !important;transition:none !important;scroll-behavior:auto}
+    .emblem path,.emblem circle,.emblem line,.emblem polygon{stroke-dashoffset:0}
+    .ticker-track{animation:none}
+  }
+
+  /* ---- lore / holders / identity boxes ---- */
+  .xbox{margin:1.2rem;border:var(--bw) solid var(--gold-deep);background:var(--bg)}
+  .xbox-h{display:flex;align-items:center;gap:.5rem;padding:.6rem .9rem;background:var(--panel-2);border-bottom:var(--bw) solid var(--gold-deep)}
+  .xbox-h .t{font-family:'Space Mono',monospace;font-weight:700;font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--gold)}
+  .xbox-b{padding:.95rem}
+  .lore-top{display:flex;gap:.9rem;align-items:center;margin-bottom:.8rem}
+  .lore-top img{width:54px;height:54px;border:var(--bw) solid var(--gold);object-fit:cover;background:var(--panel)}
+  .lore-name{font-family:'Syne',sans-serif;font-weight:800;text-transform:uppercase;font-size:1.15rem;color:var(--paper);line-height:1}
+  .lore-sym{font-family:'Space Mono',monospace;font-size:.72rem;color:var(--gold);margin-top:.25rem;letter-spacing:.08em}
+  .lore-desc{color:var(--mist);font-size:.92rem;line-height:1.55;white-space:pre-wrap}
+  .socials{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.9rem}
+  .socials a{display:inline-flex;align-items:center;gap:.4rem;font-family:'Space Mono',monospace;font-weight:700;
+    font-size:.74rem;text-transform:uppercase;letter-spacing:.04em;text-decoration:none;color:var(--ink);
+    background:var(--gold);border:var(--bw) solid var(--ink);padding:.4rem .75rem;box-shadow:3px 3px 0 #000;transition:transform .1s,box-shadow .1s}
+  .socials a:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 #000}
+  .socials a svg{width:13px;height:13px}
+  .holder{display:flex;align-items:center;gap:.7rem;padding:.5rem 0;border-bottom:1px dashed var(--gold-deep)}
+  .holder:last-child{border-bottom:none}
+  .holder .rank{font-family:'Space Mono',monospace;font-size:.72rem;color:var(--dim);width:1.6rem}
+  .holder .addr{font-family:'Space Mono',monospace;font-size:.8rem;color:var(--paper);min-width:7.5rem}
+  .holder .bar{flex:1;height:10px;background:var(--panel);border:1px solid var(--gold-deep);position:relative;overflow:hidden}
+  .holder .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--gold);display:block}
+  .holder.whale .bar i,.holder.insider .bar i{background:var(--blood)}
+  .holder .pct{font-family:'Space Mono',monospace;font-weight:700;font-size:.78rem;color:var(--gold);width:3.6rem;text-align:right}
+  .holder.whale .pct,.holder.insider .pct{color:var(--blood)}
+  .holder .tag{font-family:'Space Mono',monospace;font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--blood);border:1px solid var(--blood);padding:.1rem .3rem}
+  .ident-row{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:.7rem}
+  .ident-row .chip{font-family:'Space Mono',monospace;font-size:.78rem;color:var(--ink);background:var(--gold);border:var(--bw) solid var(--ink);padding:.35rem .7rem;box-shadow:3px 3px 0 #000}
+  .ident-note{color:var(--dim);font-size:.78rem;line-height:1.5;font-family:'Space Mono',monospace}
+  .ident-empty{color:var(--mist);font-size:.88rem}
+
+  /* ---- wallet portfolio (worth) ---- */
+  .port{margin-bottom:1rem;border:var(--bw) solid var(--gold-deep);background:var(--ink)}
+  .port-top{display:flex;justify-content:space-between;align-items:baseline;padding:.7rem .85rem;background:var(--gold);color:var(--ink)}
+  .port-l{font-family:'Space Mono',monospace;font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;font-weight:700}
+  .port-v{font-family:'Syne',sans-serif;font-weight:800;font-size:1.35rem;line-height:1}
+  .port-sol{font-family:'Space Mono',monospace;font-size:.72rem;color:var(--mist);padding:.5rem .85rem;border-bottom:1px solid var(--gold-deep)}
+  .holds{display:flex;flex-direction:column}
+  .hold{display:flex;align-items:center;gap:.6rem;padding:.45rem .85rem;border-bottom:1px solid var(--panel)}
+  .hold:last-child{border-bottom:none}
+  .hold .sym{display:flex;align-items:center;gap:.45rem;font-family:'Space Mono',monospace;font-weight:700;font-size:.82rem;color:var(--paper);min-width:6rem}
+  .hold .sym img{width:18px;height:18px;border-radius:50%;object-fit:cover;background:var(--panel)}
+  .hold .amt{flex:1;text-align:right;font-family:'Space Mono',monospace;font-size:.74rem;color:var(--mist)}
+  .hold .val{font-family:'Space Mono',monospace;font-weight:700;font-size:.82rem;color:var(--gold);min-width:5rem;text-align:right}
+  .port-more{font-family:'Space Mono',monospace;font-size:.68rem;color:var(--dim);padding:.5rem .85rem;text-align:center;border-top:1px solid var(--panel)}
+
+
+  /* ---- CA box + market tiles + wallet holdings grid ---- */
+  .cabox{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;margin:1.2rem 1.2rem 0;border:var(--bw) solid var(--gold-deep);background:var(--void-2,#0e1119);padding:.7rem .9rem}
+  .cabox .calabel{font-family:'Space Mono',monospace;font-size:.62rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+  .cabox .caval{flex:1;min-width:8rem;font-family:'Space Mono',monospace;font-size:.84rem;color:var(--paper);word-break:break-all}
+  .cabox .cacopy{cursor:pointer;font-family:'Space Mono',monospace;font-weight:700;font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ink);background:var(--gold);border:2px solid var(--ink);padding:.35rem .7rem;box-shadow:3px 3px 0 #000;transition:transform .1s,box-shadow .1s}
+  .cabox .cacopy:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 #000}
+  .cabox .cacopy:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #000}
+  .cabox .cacopy.done{background:var(--paper)}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(108px,1fr));gap:1px;margin:1.2rem;border:var(--bw) solid var(--gold-deep);background:var(--gold-deep)}
+  .tile{background:var(--bg);padding:.8rem .9rem}
+  .tile .tl{font-family:'Space Mono',monospace;font-size:.6rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--mist)}
+  .tile .tv{font-family:'Syne',sans-serif;font-weight:800;font-size:1.25rem;color:var(--gold);margin-top:.25rem;line-height:1}
+  .tile.danger .tv{color:var(--blood)}
+  .grid-tokens{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:.7rem;margin-top:.9rem}
+  .tok{border:var(--bw) solid var(--gold-deep);background:var(--bg);padding:.7rem .5rem;text-align:center}
+  .tok img{width:42px;height:42px;border:2px solid var(--gold);object-fit:cover;background:var(--panel);margin-bottom:.5rem}
+  .tok .tk-noimg{width:42px;height:42px;border:2px solid var(--gold-deep);display:flex;align-items:center;justify-content:center;margin:0 auto .5rem;font-family:'Syne',sans-serif;font-weight:800;color:var(--gold-deep);font-size:1rem}
+  .tok .tk-sym{font-family:'Syne',sans-serif;font-weight:700;text-transform:uppercase;font-size:.8rem;color:var(--paper);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tok .tk-amt{font-family:'Space Mono',monospace;font-size:.64rem;color:var(--mist);margin-top:.2rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tok .tk-val{font-family:'Space Mono',monospace;font-size:.68rem;color:var(--gold);margin-top:.15rem}
+
+
+  /* ---- PLEROMA token banner (this token only) ---- */
+  .plbar{background:var(--panel-2);border-bottom:var(--bw) solid var(--gold)}
+  .plbar-inner{display:flex;align-items:center;gap:clamp(.8rem,2vw,1.6rem);flex-wrap:wrap;padding:.7rem 0}
+  .pl-left{display:flex;align-items:center;gap:.6rem}
+  .pl-badge{font-family:'Syne',sans-serif;font-weight:800;font-size:.9rem;letter-spacing:.04em;color:var(--ink);background:var(--gold);border:2px solid var(--ink);padding:.18rem .5rem;box-shadow:3px 3px 0 #000}
+  .pl-label{font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--mist)}
+  .pl-k{font-family:'Space Mono',monospace;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--dim);margin-right:.4rem}
+  .pl-ca-wrap{display:flex;align-items:center;gap:.5rem;border:2px solid var(--gold-deep);padding:.3rem .6rem;background:var(--bg)}
+  .pl-ca{font-family:'Space Mono',monospace;font-size:.82rem;color:var(--paper)}
+  .pl-copy{cursor:pointer;font-family:'Space Mono',monospace;font-weight:700;font-size:.64rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ink);background:var(--gold);border:2px solid var(--ink);padding:.2rem .5rem;transition:transform .1s}
+  .pl-copy:active{transform:translate(1px,1px)}
+  .pl-right{display:flex;align-items:center;gap:.7rem;margin-left:auto}
+  .pl-mcap{font-family:'Syne',sans-serif;font-weight:800;font-size:1.05rem;color:var(--gold)}
+  .pl-change{font-family:'Space Mono',monospace;font-weight:700;font-size:.78rem}
+  .pl-change.up{color:#46d369}.pl-change.down{color:var(--blood)}
+  .pl-tag{font-family:'Space Mono',monospace;font-weight:700;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);background:var(--gold);border:2px solid var(--ink);padding:.18rem .45rem}
+  .pl-tag.soon{background:var(--panel);color:var(--gold);border-color:var(--gold-deep)}
+  @media(max-width:680px){.pl-right{margin-left:0;width:100%}}
+
+  /* ---- wallet scanned images grid ---- */
+  .wgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(58px,1fr));gap:.5rem}
+  .wimg{aspect-ratio:1;border:2px solid var(--gold-deep);background:var(--panel);overflow:hidden}
+  .wimg img{width:100%;height:100%;object-fit:cover;display:block}
+
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-eye" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 24s8-13 21-13 21 13 21 13-8 13-21 13S3 24 3 24Z"/>
+      <circle cx="24" cy="24" r="7"/><circle cx="24" cy="24" r="2.6" fill="currentColor" stroke="none"/>
+      <path d="M24 4v3M24 41v3M9 9l2 2M37 9l-2 2"/>
+    </symbol>
+    <symbol id="i-aureole" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="24" cy="24" r="9"/>
+      <path d="M24 2v7M24 39v7M2 24h7M39 24h7M8 8l5 5M40 8l-5 5M8 40l5-5M40 40l-5-5"/>
+    </symbol>
+    <symbol id="i-vesica" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2">
+      <circle cx="18" cy="24" r="13"/><circle cx="30" cy="24" r="13"/><circle cx="24" cy="24" r="13" opacity=".5"/>
+    </symbol>
+    <symbol id="i-key" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="16" cy="16" r="9"/><path d="M22.5 22.5 41 41M34 34l5-5M30 38l4-4"/>
+    </symbol>
+    <symbol id="i-ouroboros" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M24 6a18 18 0 1 1-9 33.5"/><path d="m13 33 2.5 7.5L23 38"/><circle cx="24" cy="6" r="2.4" fill="currentColor" stroke="none"/>
+    </symbol>
+    <symbol id="i-hand" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 24v-9a3 3 0 0 1 6 0v7M20 22v-3a3 3 0 0 1 6 0v3M26 22a3 3 0 0 1 6 0v9c0 6-4 11-11 11s-11-4-13-10l-2-6a3 3 0 0 1 5-2l3 4"/>
+      <circle cx="21" cy="14" r="3"/>
+    </symbol>
+    <symbol id="i-seal" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="11" y="21" width="26" height="20" rx="1"/><path d="M16 21v-5a8 8 0 0 1 16 0v5"/><circle cx="24" cy="30" r="2.4"/><path d="M24 32.4V36"/>
+    </symbol>
+    <symbol id="i-serpent" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M8 14c6 0 6 8 12 8s6-8 12-8 8 4 8 10-4 12-10 12"/><path d="M10 36c-1.5-1.5-2-3.5-2-5"/><circle cx="10" cy="11.5" r="1.8" fill="currentColor" stroke="none"/>
+    </symbol>
+    <symbol id="i-check" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M13 24.5 21 32l14-15"/></symbol>
+    <symbol id="i-cross" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 15 33 33M33 15 15 33"/></symbol>
+    <symbol id="i-veil" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M24 13v22M13 24h22" opacity=".5"/><circle cx="24" cy="24" r="14" stroke-dasharray="4 5"/>
+    </symbol>
+    <symbol id="i-x" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.66l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.45-6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77Z"/>
+    </symbol>
+    <symbol id="i-tg" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+      <path d="M21.94 4.3 18.9 19.05c-.23 1.02-.84 1.27-1.7.79l-4.7-3.47-2.27 2.18c-.25.25-.46.46-.94.46l.33-4.78 8.7-7.86c.38-.34-.08-.53-.59-.19L6.78 13.1l-4.64-1.45c-1.01-.31-1.03-1.01.21-1.5L20.6 2.86c.84-.31 1.57.19 1.34 1.44Z"/>
+    </symbol>
+    <symbol id="i-discord" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+      <path d="M20.3 4.4A19 19 0 0 0 15.6 3l-.24.48a17.6 17.6 0 0 1 4.16 1.3 16.8 16.8 0 0 0-14.06 0A17.6 17.6 0 0 1 9.64 3.5L9.4 3a19 19 0 0 0-4.7 1.4C1.7 8.86.9 13.2 1.3 17.5a19 19 0 0 0 5.8 2.92l.46-.64a12.5 12.5 0 0 1-1.96-.95l.48-.36a13.4 13.4 0 0 0 11.45 0l.48.36c-.62.37-1.28.69-1.97.95l.47.64a19 19 0 0 0 5.8-2.92c.47-5-.8-9.3-3.4-13.1ZM8.4 14.9c-1.13 0-2.06-1.04-2.06-2.32S7.25 10.26 8.4 10.26c1.16 0 2.08 1.05 2.06 2.32 0 1.28-.91 2.32-2.06 2.32Zm7.2 0c-1.13 0-2.06-1.04-2.06-2.32s.91-2.32 2.06-2.32c1.16 0 2.08 1.05 2.06 2.32 0 1.28-.9 2.32-2.06 2.32Z"/>
+    </symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+      <circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18"/>
+    </symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M4 4v16h16"/><path d="M7 14l3-4 3 3 4-6"/>
+    </symbol>
+    <symbol id="i-scan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="6"/><path d="M20 20l-4.3-4.3"/>
+    </symbol>
+  </defs>
+</svg>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="#top">
+      <span class="box"><svg><use href="#i-eye"/></svg></span>
+      <span class="word">Pleroma</span>
+    </a>
+    <nav class="nav-links">
+      <a href="#oracle">Oracle</a>
+      <a href="/codex">Codex</a>
+      <a href="/communion">Communion</a>
+      <a class="btn" href="#oracle">Consult →</a>
+    </nav>
+  </div>
+</header>
+
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track">
+    <span>★ See past the illusion</span><span>★ The Fullness reveals</span><span>★ Emanation or Demiurge</span><span>★ Ask the Oracle</span>
+    <span>★ See past the illusion</span><span>★ The Fullness reveals</span><span>★ Emanation or Demiurge</span><span>★ Ask the Oracle</span>
+  </div>
+</div>
+<div class="plbar">
+  <div class="wrap plbar-inner">
+    <div class="pl-left"><span class="pl-badge">$PLEROMA</span><span class="pl-label">The Token</span></div>
+    <div class="pl-ca-wrap"><span class="pl-k">CA</span><span class="pl-ca" id="pl-ca">…</span><button class="pl-copy" id="pl-copy" style="display:none">Copy</button></div>
+    <div class="pl-right"><span class="pl-k">MCAP</span><span class="pl-mcap" id="pl-mcap">—</span><span class="pl-change" id="pl-change"></span><span class="pl-tag" id="pl-tag">—</span></div>
+  </div>
+</div>
+
+<main id="top">
+  <section class="hero wrap" id="oracle">
+    <div class="emblem-stage">
+      <div class="medallion">
+        <svg class="emblem" viewBox="0 0 240 240" role="img" aria-label="The Eye of the Fullness">
+          <g class="ring-outer" stroke="currentColor" fill="none">
+            <circle cx="120" cy="120" r="110" stroke-width="2"/>
+            <g stroke-width="2.4">
+              <line x1="120" y1="2" x2="120" y2="20"/><line x1="120" y1="220" x2="120" y2="238"/>
+              <line x1="2" y1="120" x2="20" y2="120"/><line x1="220" y1="120" x2="238" y2="120"/>
+              <line x1="33" y1="33" x2="46" y2="46"/><line x1="207" y1="33" x2="194" y2="46"/>
+              <line x1="33" y1="207" x2="46" y2="194"/><line x1="207" y1="207" x2="194" y2="194"/>
+            </g>
+          </g>
+          <g class="ring-mid" stroke="currentColor" fill="none" stroke-width="2">
+            <circle cx="120" cy="120" r="90"/>
+            <polygon points="120,42 187,158 53,158"/><polygon points="120,198 53,82 187,82"/>
+          </g>
+          <g class="breathe" stroke="currentColor" fill="none">
+            <circle cx="120" cy="120" r="60" stroke-width="2.4"/>
+            <circle cx="104" cy="120" r="30" stroke-width="1.6"/><circle cx="136" cy="120" r="30" stroke-width="1.6"/>
+            <path d="M78 120s17-26 42-26 42 26 42 26-17 26-42 26-42-26-42-26Z" stroke-width="3"/>
+            <circle cx="120" cy="120" r="15" stroke-width="3"/>
+            <circle cx="120" cy="120" r="6" fill="currentColor" stroke="none"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <h1 class="display">See past the <span class="hl">Demiurge's</span> illusions</h1>
+    <p class="lede">PLEROMA is a truth oracle for crypto. Name a token, a wallet, or a contract — or just ask if it's safe — and receive the Fullness: the complete picture, plain words, one clear verdict.</p>
+
+    <div class="console">
+      <div class="console-bar"><span class="sq"></span><span class="label">The Oracle · Awaiting Inquiry</span></div>
+      <div class="console-body">
+        <div class="field">
+          <textarea id="query" rows="1" placeholder="Paste a token address, or ask: &quot;Is this coin safe to buy?&quot;" aria-label="Your inquiry to the Oracle"></textarea>
+          <div class="field-row">
+            <span class="field-note">Insight, not financial advice. Live on-chain verification connects through your backend.</span>
+            <button class="reveal" id="ask"><svg><use href="#i-eye"/></svg> Reveal the Fullness</button>
+          </div>
+        </div>
+        <div class="suggest" id="suggest">
+          <button data-q="What are the clearest signs a Solana token is a rug pull?">Signs of a rug</button>
+          <button data-q="A token launched 2 hours ago, top 10 wallets hold 60%, liquidity not locked. Is this safe?">Judge this setup</button>
+          <button data-q="How do I tell organic hype from bot-manufactured volume?">Real vs fake hype</button>
+        </div>
+        <div class="consulting" id="consulting" aria-live="polite"><span class="blk"></span><span class="status" id="status">Gazing beyond the veil…</span></div>
+
+        <div class="verdict" id="verdict" aria-live="polite">
+          <div class="verdict-head">
+            <div class="verdict-mark"><svg id="v-mark-svg"><use href="#i-check"/></svg></div>
+            <div class="verdict-titles">
+              <div class="v-kicker" id="v-kicker">The Oracle has spoken</div>
+              <div class="v-title" id="v-title">—</div>
+            </div>
+            <div class="clarity"><div class="num" id="v-clarity">—</div><div class="cap">Clarity</div></div>
+          </div>
+          <p class="reading" id="v-reading"></p>
+          <div class="signals" id="v-signals"></div>
+          <div id="v-ca"></div>
+          <div id="v-market"></div>
+          <div id="v-lore"></div>
+          <div id="v-holders"></div>
+          <div id="v-identity"></div>
+          <div id="v-walletimgs"></div>
+          <p class="disclaim">The Oracle reasons from what it is shown. Verdicts are illustrative until bound to live on-chain data through your backend — not a guarantee of safety. No reading replaces your own diligence.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block wrap" id="reveal">
+    <div class="sec-head">
+      <span class="eyebrow">What the Oracle Reveals</span>
+      <h2 class="display">Six veils. <span class="u">Lifted.</span></h2>
+      <p>Every illusion of the Demiurge leaves a trace on-chain. PLEROMA reads them all at once and renders them in language anyone can act on.</p>
+    </div>
+    <div class="grid">
+      <div class="cell"><div class="iconbox"><svg><use href="#i-hand"/></svg></div><div class="plain">Holder concentration</div><h3>The True Holders</h3><p>Who actually holds the supply. A few wallets clutching the majority is the oldest trap there is.</p></div>
+      <div class="cell"><div class="iconbox"><svg><use href="#i-seal"/></svg></div><div class="plain">Liquidity & mint</div><h3>The Sealed Vault</h3><p>Is liquidity locked and the mint authority renounced — or can the creator drain and print at will?</p></div>
+      <div class="cell"><div class="iconbox"><svg><use href="#i-serpent"/></svg></div><div class="plain">Deployer history</div><h3>The Hidden Hand</h3><p>The wallet behind the launch, and what it has done before. Serial deployers leave a trail.</p></div>
+      <div class="cell"><div class="iconbox"><svg><use href="#i-veil"/></svg></div><div class="plain">Organic vs bot volume</div><h3>Manufactured Hype</h3><p>Whether the noise is real conviction or a machine inflating the chart to lure you in.</p></div>
+      <div class="cell"><div class="iconbox"><svg><use href="#i-vesica"/></svg></div><div class="plain">Original vs copycat</div><h3>The Origin</h3><p>The genuine emanation, or one of a hundred imitations riding a name that was never theirs.</p></div>
+      <div class="cell"><div class="iconbox"><svg><use href="#i-ouroboros"/></svg></div><div class="plain">Trade & contract flags</div><h3>The Closing Snare</h3><p>Honeypots, sell taxes, and hidden functions that let you in but never let you out.</p></div>
+    </div>
+  </section>
+
+  <section class="block wrap" id="doctrine">
+    <div class="sec-head">
+      <span class="eyebrow">The Rite</span>
+      <h2 class="display">Three motions to <span class="u">knowing.</span></h2>
+    </div>
+    <div class="steps">
+      <div class="step"><span class="idx">I · Inquire</span><h3>Bring your question</h3><p>Paste an address or ask in plain words. The Oracle takes any inquiry — a contract, a wallet, or a doubt.</p></div>
+      <div class="step"><span class="idx">II · Discern</span><h3>The veils are read</h3><p>Holders, liquidity, the hand behind it, the shape of the hype — every signal weighed against the patterns of deception.</p></div>
+      <div class="step"><span class="idx">III · Receive</span><h3>The Fullness returns</h3><p>One verdict, a clarity score, and the reasoning laid bare — Emanation of the Fullness, or Illusion of the Demiurge.</p></div>
+    </div>
+  </section>
+
+  <section class="block wrap">
+    <div class="creed">
+      <div class="ib"><svg><use href="#i-aureole"/></svg></div>
+      <p>The material world is built of illusions. Pleroma reveals the light behind them.</p>
+      <div class="src">— The First Principle</div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-top">
+      <div class="foot-brand">
+        <div class="word"><span class="box"><svg><use href="#i-eye"/></svg></span> Pleroma</div>
+        <p>A truth oracle for crypto. Insight drawn from on-chain reality, spoken plainly — so you see what is real before you commit to it.</p>
+      </div>
+      <div class="foot-cols">
+        <div class="foot-col"><h4>The Oracle</h4><a href="#oracle">Consult</a><a href="#reveal">What it reveals</a><a href="#doctrine">The rite</a></div>
+        <div class="foot-col"><h4>The Communion</h4><a href="/communion">Enter the broadcast</a><a href="/codex#token">The token</a><a href="/codex#doctrine">Doctrine</a></div>
+        <div class="foot-col"><h4>Connect</h4><a href="https://x.com/Pleroma00" target="_blank" rel="noopener">X / Twitter</a><a href="/codex">Docs</a></div>
+      </div>
+    </div>
+    <div class="foot-bottom"><span>© 2026 Pleroma · The Fullness</span><span>Insight, not financial advice</span></div>
+  </div>
+</footer>
+
+<script>
+const $ = s => document.querySelector(s);
+const BACKEND_URL = ''; // same-origin: served by the backend at /
+const queryEl = $('#query'), askBtn = $('#ask');
+const consulting = $('#consulting'), statusEl = $('#status'), verdict = $('#verdict');
+
+queryEl.addEventListener('input', () => { queryEl.style.height='auto'; queryEl.style.height=Math.min(queryEl.scrollHeight,220)+'px'; });
+$('#suggest').addEventListener('click', e => { const b=e.target.closest('button'); if(!b) return; queryEl.value=b.dataset.q; queryEl.dispatchEvent(new Event('input')); queryEl.focus(); });
+queryEl.addEventListener('keydown', e => { if(e.key==='Enter' && (e.metaKey||e.ctrlKey)){ e.preventDefault(); consult(); } });
+askBtn.addEventListener('click', consult);
+
+const statuses=['Gazing beyond the veil…','Reading the holders…','Weighing the hidden hand…','Light from shadow…','The Fullness gathers…'];
+let statusTimer=null;
+function cycleStatus(){ let i=0; statusEl.textContent=statuses[0]; statusTimer=setInterval(()=>{i=(i+1)%statuses.length; statusEl.textContent=statuses[i];},1400); }
+
+// SYSTEM prompt now lives server-side (app/main.py)
+
+
+const ICONS={holders:'i-hand',liquidity:'i-seal',deployer:'i-serpent',hype:'i-veil',origin:'i-vesica',snare:'i-ouroboros',veil:'i-veil'};
+
+async function consult(){
+  const q=queryEl.value.trim(); if(!q){ queryEl.focus(); return; }
+  askBtn.disabled=true; verdict.classList.remove('on'); consulting.classList.add('on'); cycleStatus();
+  try{
+    const res=await fetch(BACKEND_URL+'/oracle',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({query:q})
+    });
+    if(!res.ok) throw new Error('status '+res.status);
+    render(await res.json());
+  }catch(err){
+    render({verdict:'veiled',title:'THE VEIL HOLDS',clarity:0,
+      reading:'The Oracle could not reach beyond the veil — '+(err.message||'an unknown obstruction')+'. Gather your inquiry and ask again.',
+      signals:[{name:'The Channel',icon:'veil',state:'unknown',note:'Connection to the Oracle was interrupted. Try once more.'}]});
+  }finally{
+    clearInterval(statusTimer); consulting.classList.remove('on'); askBtn.disabled=false;
+  }
+}
+
+function render(r){
+  const v=['emanation','illusion','veiled'].includes(r.verdict)?r.verdict:'veiled';
+  verdict.className='verdict '+v;
+  const markIcon=v==='emanation'?'i-check':v==='illusion'?'i-cross':'i-veil';
+  $('#v-mark-svg').innerHTML='<use href="#'+markIcon+'"/>';
+  $('#v-title').textContent=r.title||(v==='emanation'?'EMANATION OF THE FULLNESS':v==='illusion'?'ILLUSION OF THE DEMIURGE':'VEILED IN SHADOW');
+  $('#v-clarity').textContent=(typeof r.clarity==='number')?r.clarity:'—';
+  $('#v-reading').textContent=r.reading||'';
+  const sigWrap=$('#v-signals'); sigWrap.innerHTML='';
+  (r.signals||[]).forEach(s=>{
+    const state=['light','shadow','unknown'].includes(s.state)?s.state:'unknown';
+    const icon=ICONS[s.icon]||'i-veil';
+    const row=document.createElement('div'); row.className='signal s-'+state;
+    row.innerHTML='<svg class="sicon"><use href="#'+icon+'"/></svg><div class="sbody"><div class="sname">'+esc(s.name||'')+'</div><div class="snote">'+esc(s.note||'')+'</div></div><span class="sstate">'+(state==='light'?'Light':state==='shadow'?'Shadow':'Veiled')+'</span>';
+    sigWrap.appendChild(row);
+  });
+  renderExtras(r);
+  // wallet scanned images grid
+  const wi=document.getElementById('v-walletimgs'); if(wi){ wi.innerHTML='';
+    const imgs=(r.identity&&r.identity.images)||[];
+    if(imgs.length){
+      const cells=imgs.map(u=>'<div class="wimg"><img src="'+esc(u)+'" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>').join('');
+      wi.innerHTML='<div class="xbox"><div class="xbox-h"><span class="t">Scanned Holdings · '+imgs.length+'</span></div><div class="xbox-b"><div class="wgrid">'+cells+'</div></div></div>';
+    }
+  }
+
+  void verdict.offsetWidth; verdict.classList.add('on'); verdict.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function socialIcon(kind){
+  if(kind==='twitter') return '𝕏';
+  if(kind==='telegram') return '✈';
+  return '🌐';
+}
+function renderExtras(r){
+  // --- helpers ---
+  const compact=n=>{ if(n==null) return null; n=Number(n);
+    if(n>=1e9) return '$'+(n/1e9).toFixed(2)+'B';
+    if(n>=1e6) return '$'+(n/1e6).toFixed(2)+'M';
+    if(n>=1e3) return '$'+(n/1e3).toFixed(1)+'K';
+    return '$'+n.toLocaleString(undefined,{maximumFractionDigits: n<1?6:2}); };
+  // --- CA box (token or wallet) ---
+  const cab=document.getElementById('v-ca'); cab.innerHTML='';
+  if(r.address){
+    const label = r.kind==='wallet' ? 'Wallet' : 'Contract';
+    cab.innerHTML='<div class="cabox"><span class="calabel">'+label+'</span>'+
+      '<span class="caval" id="ca-val">'+esc(r.address)+'</span>'+
+      '<button class="cacopy" id="ca-copy">Copy</button></div>';
+    const btn=document.getElementById('ca-copy');
+    btn.addEventListener('click',()=>{ try{ navigator.clipboard.writeText(r.address); }catch(e){}
+      btn.textContent='Copied ✓'; btn.classList.add('done');
+      setTimeout(()=>{ btn.textContent='Copy'; btn.classList.remove('done'); },1400); });
+  }
+  // --- live market tiles (tokens) ---
+  const mk=document.getElementById('v-market'); mk.innerHTML='';
+  if(r.stats){
+    const st=r.stats; const tiles=[];
+    if(st.market_cap!=null) tiles.push(['Market Cap', compact(st.market_cap), false]);
+    if(st.price_usd!=null) tiles.push(['Price', compact(st.price_usd), false]);
+    if(st.liquidity_usd!=null) tiles.push(['Liquidity', compact(st.liquidity_usd), st.liquidity_usd<5000]);
+    if(st.volume24h!=null) tiles.push(['24h Volume', compact(st.volume24h), false]);
+    if(st.age_hours!=null){ const a=st.age_hours; const txt=a<24?Math.round(a)+'h':Math.round(a/24)+'d'; tiles.push(['Age', txt, a<24]); }
+    if(tiles.length){
+      mk.innerHTML='<div class="tiles">'+tiles.map(t=>
+        '<div class="tile'+(t[2]?' danger':'')+'"><div class="tl">'+t[0]+'</div><div class="tv">'+esc(String(t[1]))+'</div></div>'
+      ).join('')+'</div>';
+    }
+  }
+  // --- lore box ---
+  const lb=document.getElementById('v-lore'); lb.innerHTML='';
+  if(r.meta){
+    const m=r.meta; const socs=m.socials||{};
+    let soc='';
+    const sa=(href,icon,label)=>'<a href="'+esc(href)+'" target="_blank" rel="noopener"><svg><use href="#'+icon+'"/></svg> '+label+'</a>';
+    if(socs.twitter) soc+=sa(socs.twitter,'i-x','Twitter');
+    if(socs.telegram) soc+=sa(socs.telegram,'i-tg','Telegram');
+    if(socs.website) soc+=sa(socs.website,'i-globe','Website');
+    if(socs.discord) soc+=sa(socs.discord,'i-discord','Discord');
+    if(r.address){ soc+=sa('https://dexscreener.com/solana/'+r.address,'i-chart','Chart');
+                   soc+=sa('https://solscan.io/token/'+r.address,'i-scan','Solscan'); }
+    lb.innerHTML='<div class="xbox"><div class="xbox-h"><span class="t">The Lore</span></div><div class="xbox-b">'+
+      '<div class="lore-top">'+(m.image?'<img src="'+esc(m.image)+'" alt="" onerror="this.style.display=\'none\'">':'')+
+      '<div><div class="lore-name">'+esc(m.name||'Unknown')+'</div>'+(m.symbol?'<div class="lore-sym">$'+esc(m.symbol)+'</div>':'')+'</div></div>'+
+      (m.description?'<div class="lore-desc">'+esc(m.description)+'</div>':'<div class="lore-desc" style="color:var(--dim)">No lore inscribed on-chain.</div>')+
+      (soc?'<div class="socials">'+soc+'</div>':'')+
+      '</div></div>';
+  }
+  // --- holders box ---
+  const hb=document.getElementById('v-holders'); hb.innerHTML='';
+  if(r.holders && r.holders.length){
+    const max=Math.max.apply(null, r.holders.map(h=>h.pct||0)) || 100;
+    let rows='';
+    r.holders.forEach((h,i)=>{
+      const pct=(h.pct!=null)?h.pct:0;
+      const w=Math.max(2, Math.round(100*pct/max));
+      const cls=(h.flag==='whale'||h.flag==='insider')?(' '+h.flag):'';
+      rows+='<div class="holder'+cls+'"><span class="rank">'+(i+1)+'</span>'+
+            '<span class="addr">'+esc(h.label||'—')+'</span>'+
+            '<span class="bar"><i style="width:'+w+'%"></i></span>'+
+            '<span class="pct">'+(h.pct!=null?h.pct+'%':'—')+'</span>'+
+            (h.flag?'<span class="tag">'+esc(h.flag)+'</span>':'')+'</div>';
+    });
+    hb.innerHTML='<div class="xbox"><div class="xbox-h"><span class="t">Top 10 Holders</span></div><div class="xbox-b">'+rows+'</div></div>';
+  }
+  // --- wallet identity + portfolio box ---
+  const ib=document.getElementById('v-identity'); ib.innerHTML='';
+  if(r.identity){
+    const id=r.identity; const doms=id.sol_domains||[];
+    const fmt=n=> (n==null?'—':'$'+Number(n).toLocaleString(undefined,{maximumFractionDigits:2}));
+    let chips = doms.length ? doms.map(d=>'<span class="chip">'+esc(d)+'</span>').join('')
+                            : '<span class="ident-empty">No .sol identity registered to this wallet.</span>';
+    // portfolio
+    let port='';
+    if(id.total_usd!=null || (id.tokens && id.tokens.length)){
+      let tiles='';
+      (id.tokens||[]).forEach(t=>{
+        const amt=Number(t.amount||0).toLocaleString(undefined,{maximumFractionDigits:4});
+        const sym=esc(t.symbol||'—');
+        const img=t.image?'<img src="'+esc(t.image)+'" alt="" onerror="this.outerHTML=\'<div class=&quot;tk-noimg&quot;>'+sym.slice(0,2)+'</div>\'">':'<div class="tk-noimg">'+sym.slice(0,2)+'</div>';
+        tiles+='<div class="tok">'+img+'<div class="tk-sym">'+sym+'</div>'+
+               '<div class="tk-amt">'+esc(amt)+'</div>'+
+               (t.usd!=null?'<div class="tk-val">'+fmt(t.usd)+'</div>':'')+'</div>';
+      });
+      const more=(id.token_count && id.tokens && id.token_count>id.tokens.length)
+        ? '<div class="port-more">+ '+(id.token_count-id.tokens.length)+' more holdings</div>' : '';
+      port='<div class="port"><div class="port-top"><span class="port-l">Wallet worth</span>'+
+           '<span class="port-v">'+fmt(id.total_usd)+'</span></div>'+
+           (id.sol_usd!=null?'<div class="port-sol">SOL · '+esc(id.sol_balance)+' (~'+fmt(id.sol_usd)+')</div>':'')+
+           (tiles?'<div class="grid-tokens">'+tiles+'</div>':'<div class="port-sol">No priced token holdings found.</div>')+
+           more+'</div>';
+    }
+    ib.innerHTML='<div class="xbox"><div class="xbox-h"><span class="t">Identity &amp; Holdings</span></div><div class="xbox-b">'+
+      port+
+      '<div class="ident-row">'+chips+'</div>'+
+      '<div class="ident-note">'+esc(id.note||'')+'</div></div></div>';
+  }
+}
+function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+// ---- PLEROMA token banner (this token only, server-configured CA) ----
+(function(){
+  const caEl=document.getElementById('pl-ca'), mc=document.getElementById('pl-mcap'),
+        ch=document.getElementById('pl-change'), tag=document.getElementById('pl-tag'),
+        copyB=document.getElementById('pl-copy');
+  if(!caEl) return;
+  let fullCA='';
+  const shorten=a=>a?a.slice(0,4)+'…'+a.slice(-4):'—';
+  copyB.addEventListener('click',()=>{ if(fullCA){ navigator.clipboard.writeText(fullCA); const o=copyB.textContent; copyB.textContent='Copied'; setTimeout(()=>copyB.textContent=o,1200);} });
+  async function load(){
+    try{
+      const d=await (await fetch('/token/stats')).json();
+      if(!d.launched){ caEl.textContent='Revealed at launch'; copyB.style.display='none'; mc.textContent='—'; ch.textContent=''; tag.textContent='Pre-launch'; tag.classList.add('soon'); return; }
+      fullCA=d.ca||''; caEl.textContent=shorten(fullCA); copyB.style.display='';
+      if(d.pending||d.error){ mc.textContent=d.error?'—':'Awaiting market'; ch.textContent=''; tag.textContent='Live soon'; tag.classList.add('soon'); return; }
+      tag.textContent='Live'; tag.classList.remove('soon');
+      mc.textContent = d.mcap!=null ? '$'+Number(d.mcap).toLocaleString(undefined,{maximumFractionDigits:0}) : '—';
+      if(d.change24h!=null){ const v=Number(d.change24h); ch.textContent=(v>=0?'+':'')+v.toFixed(1)+'%'; ch.className='pl-change '+(v>=0?'up':'down'); }
+      else ch.textContent='';
+    }catch(e){}
+  }
+  load(); setInterval(load, 30000);
+})();
+
+</script>
+</body>
+</html>
