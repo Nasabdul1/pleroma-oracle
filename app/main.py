@@ -14,6 +14,7 @@ If the model is unavailable, a templated reading is used so the API still works.
 """
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 import time
@@ -33,7 +34,7 @@ from .analysis import (
     rules_token, rules_wallet, TokenFacts, WalletFacts,
     build_token_meta, build_holders, build_wallet_identity, build_token_stats,
 )
-from .models import OracleRequest, OracleResponse
+from .models import OracleRequest, OracleResponse, Signal
 
 load_dotenv()
 
@@ -61,7 +62,8 @@ RATE_PER_MIN = int(os.getenv("RATE_PER_MIN", "30"))
 # The PLEROMA token contract. Leave empty until launch; swap in .env to go live.
 PLEROMA_CA = os.getenv("PLEROMA_CA", "").strip()
 
-app = FastAPI(title="PLEROMA Oracle", version="1.0")
+# Swagger UI is moved to /api-docs so the user-facing /docs page can use the obvious slug.
+app = FastAPI(title="PLEROMA Oracle", version="1.0", docs_url="/api-docs", redoc_url="/api-redoc")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
@@ -89,16 +91,35 @@ async def home():
     return _serve("pleroma.html")
 
 
-@app.get("/codex")
-async def codex():
-    """The Codex — doctrine, veils, verdicts, token, FAQ."""
-    return _serve("codex.html")
+@app.get("/docs", include_in_schema=False)
+async def docs_page():
+    """The Docs — how the tool works, the six veils, verdicts, lore, pages, API, FAQ."""
+    return _serve("docs.html")
+
+
+@app.get("/codex", include_in_schema=False)
+async def codex_redirect():
+    """Legacy /codex path redirects to /docs (the Codex was renamed)."""
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="/docs", status_code=301)
 
 
 @app.get("/communion")
 async def communion_page():
     """The Communion — the live broadcast of the faithful."""
     return _serve("communion.html")
+
+
+@app.get("/leaderboard")
+async def leaderboard_page():
+    """The Leaderboard — top emanations and illusions of the Demiurge."""
+    return _serve("leaderboard.html")
+
+
+@app.get("/alerts")
+async def alerts_page():
+    """Demiurge Alerts — live broadcast of high-clarity illusions."""
+    return _serve("alerts.html")
 
 
 # --------------------------- The Communion (live chat) -----------------------
@@ -136,6 +157,13 @@ async def communion_post(payload: dict, request: Request):
 # ------ tiny in-memory cache + rate limiter (swap for Redis in prod) ----------
 _cache: Dict[str, Tuple[float, dict]] = {}
 _hits: Dict[str, List[float]] = defaultdict(list)
+
+# --- leaderboard + alerts (in-memory, swap for Redis in prod) ---
+_LEADERBOARD: Dict[str, dict] = {"emanation": [], "illusion": []}  # {ca: {ca, name, symbol, verdict, clarity, ts, image}}
+_LEADERBOARD_MAX = 50
+_ALERT_SUBSCRIBERS: List[asyncio.Queue] = []
+_ALERT_MAX = 100
+_RECENT_ALERTS: List[dict] = []
 
 
 def _cache_get(key: str):
@@ -203,13 +231,13 @@ async def _llm(client: httpx.AsyncClient, system: str, user: str) -> str:
                 headers=headers,
                 json={
                     "model": model,
-                    "max_tokens": 700,
+                    "max_tokens": 1500,
                     "messages": [
                         {"role": "system", "content": system},
                         {"role": "user", "content": user},
                     ],
                 },
-                timeout=30,
+                timeout=45,
             )
             # model unavailable (404) or throttled (429) -> next model in the chain
             if r.status_code in (404, 429, 502, 503):
@@ -220,7 +248,14 @@ async def _llm(client: httpx.AsyncClient, system: str, user: str) -> str:
             if isinstance(data, dict) and data.get("error") and not data.get("choices"):
                 last_err = RuntimeError(f"{model}: {data['error']}")
                 continue
-            content = (data["choices"][0]["message"]["content"] or "").strip()
+            choice = data["choices"][0]
+            content = (choice.get("message", {}).get("content") or "").strip()
+            # Reasoning models can burn the entire token budget on internal thinking
+            # and emit a truncated body; treat that the same as an empty response
+            # so the next model in the chain gets a chance.
+            if choice.get("finish_reason") == "length" and len(content) < 80:
+                last_err = RuntimeError(f"{model}: truncated by reasoning overhead")
+                continue
             if content:
                 return content
             last_err = RuntimeError(f"{model}: empty response")
@@ -287,6 +322,173 @@ async def token_stats():
     return out
 
 
+# --------------------------- permalink pages ----------------------------------
+@app.get("/token/{ca}")
+async def token_page(ca: str):
+    """Permalink HTML page — JS fetches /api/token/{ca} for the verdict JSON."""
+    return _serve("token.html")
+
+
+@app.get("/wallet/{addr}")
+async def wallet_page_html(addr: str):
+    """Permalink HTML page — JS fetches /api/wallet/{addr} for the verdict JSON."""
+    return _serve("wallet.html")
+
+
+@app.get("/api/token/{ca}")
+async def token_data(ca: str):
+    """JSON verdict for a token (used by token.html)."""
+    if not validate_address(ca):
+        return JSONResponse({"detail": "Invalid Solana address"}, status_code=400)
+    cached = _cache_get(ca)
+    if cached:
+        return JSONResponse(cached)
+    async with httpx.AsyncClient() as client:
+        kind, val = await classify(client, ca)
+        if kind != "token":
+            return JSONResponse({"detail": "Address is not a token mint"}, status_code=404)
+        facts = await gather_token_facts(client, ca, val)
+        verdict, title, clarity, signals = rules_token(facts)
+        facts_json = {k: v for k, v in facts.__dict__.items() if v is not None}
+        meta = build_token_meta(facts)
+        holders = build_holders(facts)
+        stats = build_token_stats(facts)
+        try:
+            reading = await _llm(
+                client, NARRATE_SYS,
+                f"VERDICT: {verdict}\nVERIFIED FACTS:\n{json.dumps(facts_json, default=str)}\n"
+                f"SIGNALS:\n{json.dumps(signals)}",
+            )
+        except Exception:
+            reading = _template_reading(verdict, signals)
+    resp = {
+        "verdict": verdict, "title": title, "clarity": clarity, "reading": reading,
+        "signals": signals, "meta": meta, "holders": holders, "stats": stats,
+        "kind": "token", "address": ca,
+    }
+    _cache_put(ca, resp)
+    _update_leaderboard(ca, meta, verdict, clarity, reading, signals)
+    if verdict == "illusion" and clarity >= 60:
+        await _fire_alert(ca, meta, title, clarity, signals)
+    return JSONResponse(resp)
+
+
+@app.get("/api/wallet/{addr}")
+async def wallet_data(addr: str):
+    """JSON verdict for a wallet (used by wallet.html)."""
+    if not validate_address(addr):
+        return JSONResponse({"detail": "Invalid Solana address"}, status_code=400)
+    cached = _cache_get(addr)
+    if cached:
+        return JSONResponse(cached)
+    async with httpx.AsyncClient() as client:
+        kind, val = await classify(client, addr)
+        if kind != "wallet":
+            return JSONResponse({"detail": "Address is not a wallet"}, status_code=404)
+        wfacts = await gather_wallet_facts(client, addr)
+        verdict, title, clarity, signals = rules_wallet(wfacts)
+        facts_json = {k: v for k, v in wfacts.__dict__.items() if v is not None}
+        identity = build_wallet_identity(wfacts)
+        try:
+            reading = await _llm(
+                client, NARRATE_SYS,
+                f"VERDICT: {verdict}\nVERIFIED FACTS:\n{json.dumps(facts_json, default=str)}\n"
+                f"SIGNALS:\n{json.dumps(signals)}",
+            )
+        except Exception:
+            reading = _template_reading(verdict, signals)
+    resp = {
+        "verdict": verdict, "title": title, "clarity": clarity, "reading": reading,
+        "signals": signals, "identity": identity, "kind": "wallet", "address": addr,
+    }
+    _cache_put(addr, resp)
+    return JSONResponse(resp)
+
+
+# --------------------------- leaderboard --------------------------------------
+def _update_leaderboard(ca: str, meta: dict, verdict: str, clarity: int, reading: str, signals: List[dict]):
+    if not meta or not meta.get("name"):
+        return
+    entry = {
+        "ca": ca,
+        "name": meta.get("name"),
+        "symbol": meta.get("symbol"),
+        "image": meta.get("image"),
+        "verdict": verdict,
+        "clarity": clarity,
+        "ts": int(time.time()),
+        "reading": reading[:200],
+        "signals": signals,
+    }
+    board = _LEADERBOARD.get(verdict, [])
+    board = [e for e in board if e["ca"] != ca]
+    board.insert(0, entry)
+    _LEADERBOARD[verdict] = board[:_LEADERBOARD_MAX]
+
+
+@app.get("/api/leaderboard")
+async def leaderboard_data(verdict: str = "emanation", limit: int = 20):
+    """JSON top emanations or illusions (used by leaderboard.html)."""
+    v = verdict if verdict in _LEADERBOARD else "emanation"
+    return {"verdict": v, "entries": _LEADERBOARD[v][:limit]}
+
+
+# --------------------------- real-time alerts ---------------------------------
+async def _fire_alert(ca: str, meta: dict, title: str, clarity: int, signals: List[dict]):
+    alert = {
+        "id": int(time.time() * 1000),
+        "ca": ca,
+        "name": meta.get("name") if meta else "Unknown",
+        "symbol": meta.get("symbol") if meta else "?",
+        "image": meta.get("image") if meta else None,
+        "title": title,
+        "clarity": clarity,
+        "ts": int(time.time()),
+        "signals": signals,
+    }
+    _RECENT_ALERTS.insert(0, alert)
+    if len(_RECENT_ALERTS) > _ALERT_MAX:
+        _RECENT_ALERTS.pop()
+    for q in list(_ALERT_SUBSCRIBERS):
+        try:
+            q.put_nowait(alert)
+        except asyncio.QueueFull:
+            pass
+
+
+@app.get("/api/alerts/recent")
+async def recent_alerts(limit: int = 20):
+    """JSON list of recent high-clarity illusion alerts (used by alerts.html)."""
+    return {"alerts": _RECENT_ALERTS[:limit]}
+
+
+@app.websocket("/alerts/ws")
+async def alerts_ws(ws):
+    await ws.accept()
+    q = asyncio.Queue(maxsize=50)
+    _ALERT_SUBSCRIBERS.append(q)
+    try:
+        while True:
+            alert = await q.get()
+            await ws.send_json(alert)
+    except Exception:
+        pass
+    finally:
+        if q in _ALERT_SUBSCRIBERS:
+            _ALERT_SUBSCRIBERS.remove(q)
+
+
+# --------------------------- verdict card (share image) -----------------------
+@app.post("/verdict-card")
+async def verdict_card(payload: dict):
+    """Validate and return structured data for frontend canvas card generation."""
+    required = ["verdict", "title", "clarity", "reading", "signals"]
+    for k in required:
+        if k not in payload:
+            return JSONResponse({"detail": f"Missing {k}"}, status_code=400)
+    return {"ok": True, "card_data": payload}
+
+
 @app.post("/oracle", response_model=OracleResponse)
 async def oracle(req: OracleRequest, request: Request):
     ip = request.client.host if request.client else "anon"
@@ -351,6 +553,10 @@ async def oracle(req: OracleRequest, request: Request):
                 stats=stats, kind=kind, address=addr,
             ).model_dump()
             _cache_put(cache_key, resp)
+            if kind == "token":
+                _update_leaderboard(addr, meta, verdict, clarity, reading, signals)
+                if verdict == "illusion" and clarity >= 60:
+                    await _fire_alert(addr, meta, title, clarity, signals)
             return resp
 
         # ---- path B: a conceptual question (no address) ----

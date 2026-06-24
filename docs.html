@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Docs · PLEROMA</title>
+<meta name="description" content="The Docs of PLEROMA — how the truth oracle reads a Solana token or wallet, what each veil means, the verdict scoring, the permalink pages, alerts, the leaderboard, the communion, the doctrine behind it, and the developer API." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0a0a; --panel:#141312; --panel-2:#1c1a17;
+    --gold:#F4C430; --gold-2:#FFD95A; --gold-deep:#C99A1E;
+    --paper:#F2ECDC; --mist:#9d978a; --dim:#6f6a5f; --blood:#E5484D;
+    --ink:#0a0a0a; --bw:3px; --hard:6px 6px 0 #000;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--paper);
+       font-family:'Space Grotesk',sans-serif;line-height:1.6;
+       -webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 1.5rem}
+
+  /* ---- nav ---- */
+  header{position:sticky;top:0;z-index:20;background:rgba(10,10,10,.86);
+         backdrop-filter:blur(8px);border-bottom:var(--bw) solid var(--gold)}
+  .bar{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .brand{display:flex;align-items:center;gap:.7rem;text-decoration:none}
+  .brand .box{display:inline-flex;align-items:center;justify-content:center;
+       width:34px;height:34px;border:var(--bw) solid var(--gold);background:var(--ink)}
+  .brand .box svg{width:18px;height:18px;color:var(--gold)}
+  .brand .name{font-family:'Syne',sans-serif;font-weight:800;font-size:1.25rem;
+       letter-spacing:.04em;color:var(--paper)}
+  .navlinks{display:flex;align-items:center;gap:1.4rem}
+  .navlinks a{font-size:.82rem;text-transform:uppercase;letter-spacing:.07em;
+       text-decoration:none;font-weight:500;color:var(--paper);transition:color .15s}
+  .navlinks a:hover{color:var(--gold)}
+  .navlinks .btn{border:var(--bw) solid var(--gold);background:var(--gold);color:var(--ink);
+       font-weight:700;padding:.45rem .9rem;box-shadow:4px 4px 0 #000}
+  .navlinks .btn:hover{color:var(--ink);transform:translate(-1px,-1px);box-shadow:5px 5px 0 #000}
+  @media(max-width:760px){.navlinks a:not(.btn){display:none}}
+
+  /* ---- hero ---- */
+  .hero{padding:4.5rem 0 2rem}
+  .eyebrow{font-family:'Space Mono',monospace;font-size:.74rem;letter-spacing:.22em;
+       text-transform:uppercase;color:var(--gold)}
+  h1{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(2.6rem,7vw,4.6rem);
+       line-height:.96;margin:.6rem 0 1rem;text-transform:uppercase;letter-spacing:-.01em}
+  h1 .glow{color:var(--gold)}
+  .lede{font-size:1.12rem;color:var(--mist);max-width:54ch}
+
+  /* ---- contents rail ---- */
+  .toc{display:flex;flex-wrap:wrap;gap:.5rem;margin:2rem 0 1rem}
+  .toc a{font-family:'Space Mono',monospace;font-size:.74rem;text-transform:uppercase;
+       letter-spacing:.08em;text-decoration:none;color:var(--mist);
+       border:1px solid var(--gold-deep);padding:.4rem .7rem;transition:all .15s}
+  .toc a:hover{color:var(--ink);background:var(--gold);border-color:var(--gold)}
+
+  /* ---- sections ---- */
+  section{padding:2.6rem 0;border-top:1px solid var(--panel-2)}
+  .kicker{font-family:'Space Mono',monospace;font-size:.72rem;letter-spacing:.18em;
+       text-transform:uppercase;color:var(--gold-deep);display:flex;align-items:center;gap:.6rem}
+  .kicker::before{content:"";width:26px;height:1px;background:var(--gold-deep)}
+  h2{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(1.6rem,3.5vw,2.3rem);
+       text-transform:uppercase;margin:.6rem 0 1rem;line-height:1.04}
+  h3{font-family:'Syne',sans-serif;font-weight:700;font-size:1.08rem;margin:0 0 .3rem}
+  p{margin:.4rem 0 1rem;max-width:64ch}
+  .muted{color:var(--mist)}
+  ul,ol{color:var(--mist);max-width:64ch;padding-left:1.2rem}
+  ul li,ol li{margin:.35rem 0}
+  ul li strong, ol li strong{color:var(--paper)}
+  code{font-family:'Space Mono',monospace;font-size:.86em;background:var(--panel-2);
+       border:1px solid var(--gold-deep);padding:.12rem .4rem;color:var(--gold-2)}
+  pre{font-family:'Space Mono',monospace;font-size:.82rem;background:var(--panel-2);
+      border:var(--bw) solid var(--gold-deep);padding:.9rem 1rem;overflow-x:auto;
+      color:var(--paper);max-width:64ch;line-height:1.5}
+  pre code{background:none;border:none;padding:0;color:inherit}
+
+  .steps{display:grid;gap:1rem;margin-top:1rem}
+  .step{display:grid;grid-template-columns:auto 1fr;gap:1rem;align-items:start}
+  .step .n{font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;color:var(--gold);
+       border:var(--bw) solid var(--gold);width:46px;height:46px;display:flex;
+       align-items:center;justify-content:center;flex:none;box-shadow:var(--hard)}
+
+  /* pipeline diagram (text-based) */
+  .pipe{display:grid;gap:.8rem;margin:1.4rem 0;font-family:'Space Mono',monospace;font-size:.86rem}
+  .pipe .row{display:grid;grid-template-columns:auto 1fr;gap:1rem;align-items:start;
+       border-left:3px solid var(--gold-deep);padding:.6rem .9rem;background:var(--panel)}
+  .pipe .row.gold{border-left-color:var(--gold)}
+  .pipe .row.blood{border-left-color:var(--blood)}
+  .pipe .ix{color:var(--gold);font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-size:.72rem}
+  .pipe .tx{color:var(--paper);line-height:1.6}
+  .pipe .tx b{color:var(--gold)}
+
+  .veils{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+       gap:1rem;margin-top:1.2rem}
+  .veil{border:var(--bw) solid var(--panel-2);background:var(--panel);padding:1.1rem 1.2rem}
+  .veil .tag{font-family:'Space Mono',monospace;font-size:.66rem;letter-spacing:.12em;
+       text-transform:uppercase;color:var(--gold-deep)}
+  .veil h3{margin:.35rem 0 .4rem}
+  .veil p{font-size:.92rem;color:var(--mist);margin:0}
+
+  .verdicts{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-top:1.2rem}
+  .vd{border:var(--bw) solid var(--gold-deep);background:var(--panel);padding:1.1rem 1.2rem}
+  .vd .light{color:var(--gold)}
+  .vd .shadow{color:var(--blood)}
+  .vd .veiled{color:var(--mist)}
+  .vd b{font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;text-transform:uppercase;display:block;margin-bottom:.3rem}
+  .vd p{font-size:.9rem;color:var(--mist);margin:0}
+
+  .callout{border-left:var(--bw) solid var(--gold);background:var(--panel);
+       padding:1rem 1.2rem;margin:1.2rem 0;color:var(--mist)}
+  .callout.danger{border-left-color:var(--blood)}
+  .callout b{color:var(--paper)}
+
+  .pages{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1rem;margin-top:1.2rem}
+  .page{border:var(--bw) solid var(--gold-deep);background:var(--panel);padding:1.1rem 1.2rem;display:flex;flex-direction:column;text-decoration:none;color:inherit;transition:transform .12s,box-shadow .12s}
+  .page:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--gold)}
+  .page .url{font-family:'Space Mono',monospace;font-size:.72rem;color:var(--gold);letter-spacing:.06em;margin-bottom:.4rem}
+  .page h3{margin:0 0 .4rem}
+  .page p{margin:0;color:var(--mist);font-size:.9rem}
+
+  /* api table */
+  .api{width:100%;border-collapse:collapse;font-family:'Space Mono',monospace;font-size:.82rem;margin-top:1rem;max-width:none}
+  .api th, .api td{padding:.55rem .8rem;border:1px solid var(--gold-deep);text-align:left;vertical-align:top}
+  .api th{background:var(--panel-2);color:var(--gold);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:.7rem}
+  .api td{color:var(--paper)}
+  .api td.meth{color:var(--gold);font-weight:700;width:5rem}
+  .api td.path{white-space:nowrap;color:var(--gold-2)}
+  .api td.desc{color:var(--mist)}
+  .table-wrap{overflow-x:auto;margin:1rem 0}
+
+  .cta{display:inline-flex;align-items:center;gap:.5rem;font-family:'Space Mono',monospace;
+       font-weight:700;text-transform:uppercase;letter-spacing:.06em;text-decoration:none;
+       border:var(--bw) solid var(--gold);background:var(--gold);color:var(--ink);
+       padding:.6rem 1.1rem;box-shadow:var(--hard);margin-top:.6rem}
+  .cta:hover{transform:translate(-1px,-1px);box-shadow:7px 7px 0 #000}
+  .cta.ghost{background:transparent;color:var(--gold)}
+
+  .faq dt{font-family:'Syne',sans-serif;font-weight:700;margin-top:1.1rem}
+  .faq dd{margin:.2rem 0 0;color:var(--mist)}
+
+  footer{border-top:var(--bw) solid var(--gold);margin-top:2rem;padding:1.6rem 0}
+  .foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:1rem;
+       font-family:'Space Mono',monospace;font-size:.74rem;color:var(--dim)}
+  .foot a{color:var(--mist);text-decoration:none}
+  .foot a:hover{color:var(--gold)}
+
+  :focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto;transition:none}}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/>
+    <circle cx="12" cy="12" r="3.2"/>
+  </symbol>
+</svg>
+
+<header>
+  <div class="wrap bar">
+    <a class="brand" href="/">
+      <span class="box"><svg><use href="#eye"/></svg></span>
+      <span class="name">PLEROMA</span>
+    </a>
+    <nav class="navlinks">
+      <a href="/">Oracle</a>
+      <a href="/leaderboard">Leaderboard</a>
+      <a href="/alerts">Alerts</a>
+      <a href="/communion">Communion</a>
+      <a class="btn" href="/#oracle">Open the Oracle →</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">The Docs · How everything works</div>
+    <h1>Read past the <span class="glow">veil</span></h1>
+    <p class="lede">PLEROMA is a truth oracle for Solana. Bring a token, a wallet, or a
+      plain question and it returns the Fullness — the complete on-chain picture in plain
+      words, with a single clear verdict. These docs explain exactly how the tool reads an
+      address, how to read what it returns, every page of the site, the lore beneath the
+      verdicts, and the API for builders.</p>
+    <div class="toc">
+      <a href="#quickstart">Quick start</a>
+      <a href="#how-it-works">How it works</a>
+      <a href="#veils">The six veils</a>
+      <a href="#verdicts">Verdicts &amp; clarity</a>
+      <a href="#pages">Pages of the site</a>
+      <a href="#permalinks">Permalinks &amp; sharing</a>
+      <a href="#leaderboard">Leaderboard</a>
+      <a href="#alerts">Demiurge alerts</a>
+      <a href="#communion">The communion</a>
+      <a href="#doctrine">The doctrine</a>
+      <a href="#token">$PLEROMA token</a>
+      <a href="#api">API</a>
+      <a href="#faq">FAQ</a>
+    </div>
+  </div>
+
+  <!-- =============================================== QUICK START -->
+  <section id="quickstart">
+    <div class="kicker">Quick start · 30 seconds</div>
+    <h2>Get a verdict in three motions</h2>
+    <div class="steps">
+      <div class="step"><div class="n">1</div><div>
+        <h3>Open the Oracle</h3>
+        <p class="muted">Go to <a href="/" style="color:var(--gold)">pleroma.fun</a>. The console is on the homepage —
+          a single input field labelled "Awaiting Inquiry."</p>
+      </div></div>
+      <div class="step"><div class="n">2</div><div>
+        <h3>Paste an address or ask a question</h3>
+        <p class="muted">Drop a Solana token mint, a wallet address, or just type a question
+          in plain English — <em>"Is a coin with 60% in the top 10 wallets safe?"</em>. The
+          Oracle picks the path automatically.</p>
+      </div></div>
+      <div class="step"><div class="n">3</div><div>
+        <h3>Press "Reveal the Fullness"</h3>
+        <p class="muted">You'll see one of three verdicts, a clarity score (0–100), a 2–3
+          sentence reading, the signals behind it, and — for addresses — the lore, holders,
+          market tiles, and a permalink you can share.</p>
+      </div></div>
+    </div>
+    <a class="cta" href="/#oracle">Consult now →</a>
+  </section>
+
+  <!-- =============================================== HOW IT WORKS -->
+  <section id="how-it-works">
+    <div class="kicker">Step by step · The full pipeline</div>
+    <h2>How a verdict is built</h2>
+    <p class="muted">When you press Reveal, this is exactly what happens server-side, in order. Every step is
+      deterministic except the final prose — and even that is fenced so it can't change the verdict.</p>
+
+    <div class="pipe">
+      <div class="row gold"><div class="ix">01 · Submit</div>
+        <div class="tx">Your browser <code>POST</code>s <code>{ "query": "&lt;your input&gt;" }</code> to <b>/oracle</b>.
+          A per-IP rate limiter (30/min default) and a 45-second response cache run first.</div></div>
+      <div class="row gold"><div class="ix">02 · Extract</div>
+        <div class="tx">The backend scans your text for anything that looks like a Solana address (base58, 32–44 chars).
+          If it finds one, you're on the <b>Address path</b>; otherwise the <b>Question path</b>.</div></div>
+      <div class="row gold"><div class="ix">03 · Classify</div>
+        <div class="tx"><b>Address path only.</b> A single RPC call decides what the address actually is:
+          a token mint, a wallet, or nothing-on-chain. The Oracle reads only what fits.</div></div>
+      <div class="row gold"><div class="ix">04 · Gather facts (parallel)</div>
+        <div class="tx"><b>Token:</b> RPC (supply, mint &amp; freeze authority, decimals, top accounts) + RugCheck
+          (lp lock %, risk score, holder concentration) + DexScreener (price, market cap, liquidity, age, volume,
+          socials) + Metaplex metadata (name, symbol, image, description). All fired at once.<br><br>
+          <b>Wallet:</b> RPC (SOL balance, age, token accounts) + Jupiter (USD pricing for every token) +
+          <code>.sol</code> domain reverse lookup.</div></div>
+      <div class="row gold"><div class="ix">05 · Rules engine</div>
+        <div class="tx">A <b>deterministic</b> function (<code>rules_token()</code> / <code>rules_wallet()</code>)
+          maps the verified facts to a verdict (<b>Emanation / Illusion / Veiled</b>), a clarity score (0–100), a
+          title, and the list of signals — each marked Light, Shadow, or Veiled.</div></div>
+      <div class="row blood"><div class="ix">06 · LLM narrates ONLY</div>
+        <div class="tx">The verdict, signals, and verified facts are handed to the model, which writes the
+          2–3 sentence <b>reading</b>. It is explicitly forbidden from changing the verdict, inventing a number,
+          or claiming anything not in the facts. If every model in the fallback chain is down, a templated reading
+          ships instead — the verdict never goes down because a model went down.</div></div>
+      <div class="row gold"><div class="ix">07 · Render</div>
+        <div class="tx">The response (<code>{verdict, title, clarity, reading, signals, meta, holders, stats, identity}</code>)
+          is sent back. The frontend renders the verdict card, contract box, market tiles, top-10 holders, lore,
+          identity chips, and the share buttons. If it's a high-clarity Illusion, it's also broadcast to the
+          live alerts channel and added to the leaderboard.</div></div>
+    </div>
+
+    <div class="callout"><b>Why the model can never flip a verdict.</b> Even when the LLM goes sideways — wrong
+      number, hallucinated socials, made-up history — the structural verdict stays correct, because it was decided
+      before the model was ever called. The model is the writer, not the judge.</div>
+  </section>
+
+  <!-- =============================================== VEILS -->
+  <section id="veils">
+    <div class="kicker">What it reveals</div>
+    <h2>The six veils, lifted</h2>
+    <p class="muted">Every illusion leaves a trace on-chain. PLEROMA reads these at once
+      and renders each in language you can act on.</p>
+
+    <div class="veils">
+      <div class="veil"><div class="tag">Holder concentration</div>
+        <h3>The True Holders</h3>
+        <p>Who actually holds the supply. One wallet clutching a large share — or a tight
+          top-10 — is the oldest trap there is, because a single hand can crash the price.</p></div>
+      <div class="veil"><div class="tag">Mint &amp; freeze authority</div>
+        <h3>The Sealed Mint</h3>
+        <p>Whether the creator can still print unlimited supply, or freeze your wallet so
+          you can't sell. Renounced authorities are light; active ones are shadow.</p></div>
+      <div class="veil"><div class="tag">Liquidity lock</div>
+        <h3>The Sealed Vault</h3>
+        <p>Whether liquidity is locked or burned, or can be pulled at any moment. Unlocked
+          liquidity is the mechanism behind most exits.</p></div>
+      <div class="veil"><div class="tag">Pool depth</div>
+        <h3>The Depth</h3>
+        <p>How much real liquidity backs the market. Thin pools are trivial to manipulate;
+          a healthy pool resists a single trade moving the price wildly.</p></div>
+      <div class="veil"><div class="tag">Origin &amp; lore</div>
+        <h3>The Origin</h3>
+        <p>The token's name, symbol, image, description, and socials — pulled from on-chain
+          metadata and the off-chain metadata it points to, the way trackers like Rick read lore.</p></div>
+      <div class="veil"><div class="tag">Contract snares</div>
+        <h3>The Closing Snare</h3>
+        <p>Token-2022 transfer fees and hidden functions — taxes and traps that let you in
+          but quietly tax or block the way out.</p></div>
+    </div>
+  </section>
+
+  <!-- =============================================== VERDICTS -->
+  <section id="verdicts">
+    <div class="kicker">Reading the answer</div>
+    <h2>Verdicts &amp; clarity</h2>
+    <p class="muted">Three verdicts, one score. The verdict is the judgment; the clarity
+      score tells you how much could actually be verified.</p>
+
+    <div class="verdicts">
+      <div class="vd"><b class="light">Emanation</b>
+        <p>An emanation of the Fullness. No structural deceptions surfaced and the checks
+          returned clean. Still verify the team and socials yourself.</p></div>
+      <div class="vd"><b class="shadow">Illusion</b>
+        <p>An illusion of the Demiurge. At least one major structural red flag — active
+          mint, freeze, unlocked liquidity, or extreme concentration.</p></div>
+      <div class="vd"><b class="veiled">Veiled</b>
+        <p>Veiled in shadow. Too little could be verified to render a true judgment, or the
+          cautions stack up. Treat with care and seek more light.</p></div>
+    </div>
+
+    <div class="callout"><b>Clarity (0–100)</b> is the share of core checks that returned a
+      verified answer. A high verdict with low clarity means "looks clean, but much was
+      unreadable" — weigh it accordingly. Bluechips like SOL and USDC read near 100.</div>
+
+    <h3 style="margin-top:1.6rem">Signal states</h3>
+    <ul>
+      <li><strong>Light</strong> — the check passed (renounced authority, locked liquidity, no honeypot, etc.).</li>
+      <li><strong>Shadow</strong> — the check failed (active mint, freeze authority present, unlocked LP, &gt;50% in one wallet).</li>
+      <li><strong>Veiled</strong> — the check couldn't be verified (RPC timeout, unindexed data). Treated as caution, not pass.</li>
+    </ul>
+
+    <h3 style="margin-top:1.4rem">Scanning a wallet</h3>
+    <p class="muted">Point the Oracle at a wallet and it reads age, activity, any
+      <code>.sol</code> identity, and the full portfolio — every priced token plus SOL,
+      ranked by value, with a total worth. Tokens with no market price are shown but left
+      out of the total, so the number is never fiction.</p>
+  </section>
+
+  <!-- =============================================== PAGES -->
+  <section id="pages">
+    <div class="kicker">Map of the site</div>
+    <h2>Every page, what it does</h2>
+    <p class="muted">The whole site is reachable from the nav. Each page does one thing well.</p>
+
+    <div class="pages">
+      <a class="page" href="/"><div class="url">/</div>
+        <h3>The Oracle</h3><p>Homepage. The console where you bring an address or a question.</p></a>
+      <a class="page" href="/leaderboard"><div class="url">/leaderboard</div>
+        <h3>Leaderboard</h3><p>Top emanations and illusions seen by the Oracle, freshest first, auto-refreshing.</p></a>
+      <a class="page" href="/alerts"><div class="url">/alerts</div>
+        <h3>Demiurge Alerts</h3><p>Live broadcast feed of high-clarity illusions, in real time.</p></a>
+      <a class="page" href="/communion"><div class="url">/communion</div>
+        <h3>The Communion</h3><p>The open broadcast — chat with the faithful, share findings.</p></a>
+      <a class="page" href="/docs"><div class="url">/docs</div>
+        <h3>Docs</h3><p>You are here. The full manual.</p></a>
+      <a class="page" href="/#oracle"><div class="url">/token/&lt;ca&gt;</div>
+        <h3>Token permalink</h3><p>Shareable verdict page for any token. Hero verdict, chart, holders, lore.</p></a>
+      <a class="page" href="/#oracle"><div class="url">/wallet/&lt;addr&gt;</div>
+        <h3>Wallet permalink</h3><p>Shareable reading page for any wallet. Portfolio, identity, signals.</p></a>
+    </div>
+  </section>
+
+  <!-- =============================================== PERMALINKS -->
+  <section id="permalinks">
+    <div class="kicker">Permalinks &amp; sharing</div>
+    <h2>Every verdict is a URL</h2>
+    <p class="muted">When the Oracle returns a verdict on an address, three buttons appear under the card:
+      <strong>Open Permalink</strong>, <strong>Share on X</strong>, and <strong>Save Verdict Card</strong>.</p>
+
+    <ul>
+      <li><strong>Open Permalink</strong> opens <code>/token/&lt;ca&gt;</code> or <code>/wallet/&lt;addr&gt;</code> —
+        a standalone page with the full reading. The page sets <code>og:title</code> and <code>og:description</code>
+        from the verdict, so X / Discord previews render the title and reading.</li>
+      <li><strong>Share on X</strong> pre-fills a tweet with the title, reading, and the permalink. One click,
+        the verdict is on the timeline.</li>
+      <li><strong>Save Verdict Card</strong> generates a 1200×630 PNG of the verdict and downloads it. Drop it
+        in a thread, a Telegram, anywhere.</li>
+    </ul>
+
+    <p class="muted">Permalink pages re-fetch live data each visit, so the verdict reflects the latest on-chain
+      state — not a frozen snapshot.</p>
+  </section>
+
+  <!-- =============================================== LEADERBOARD -->
+  <section id="leaderboard">
+    <div class="kicker">The Annals</div>
+    <h2>The Leaderboard</h2>
+    <p class="muted">Every successful token verdict is automatically logged. Two tabs:
+      <strong>Emanations</strong> (clean reads) and <strong>Illusions</strong> (the Demiurge's hall of shame).</p>
+
+    <ul>
+      <li>Ranked newest-first within each tab.</li>
+      <li>Up to 50 entries per side, deduped by contract.</li>
+      <li>Auto-refreshes every 30 seconds.</li>
+      <li>Fresh entries between refreshes get a <strong>NEW</strong> badge.</li>
+      <li>Clicking a row jumps to the token's permalink for the full reading.</li>
+    </ul>
+
+    <a class="cta ghost" href="/leaderboard">Open the leaderboard →</a>
+  </section>
+
+  <!-- =============================================== ALERTS -->
+  <section id="alerts">
+    <div class="kicker">Real-time</div>
+    <h2>Demiurge Alerts</h2>
+    <p class="muted">Whenever the Oracle reads a token as an <strong>Illusion</strong> with clarity ≥ 60, an alert
+      fires. The alerts page is a live feed of these — so you can be first to see the warning, not last.</p>
+
+    <ul>
+      <li>Backend pushes each alert over a WebSocket (<code>/alerts/ws</code>) to every connected client.</li>
+      <li>Recent alerts (last ~100) are replayed when you open the page, so you don't miss what landed before you arrived.</li>
+      <li>New alerts flash in with a red highlight at the top of the feed.</li>
+      <li>Enable <strong>Browser Alerts</strong> to get a desktop notification even when the tab isn't focused — click the notification to jump to the token's permalink.</li>
+      <li>Toggle <strong>Sound</strong> for a brief two-tone siren when an alert arrives.</li>
+      <li>The connection auto-reconnects with exponential backoff if it drops.</li>
+    </ul>
+
+    <a class="cta ghost" href="/alerts">Open the alerts feed →</a>
+  </section>
+
+  <!-- =============================================== COMMUNION -->
+  <section id="communion">
+    <div class="kicker">The Communion</div>
+    <h2>The shared broadcast</h2>
+    <p class="muted">The Communion is the open channel — where readings are posted and discussed
+      in real time, so no one walks into the dark alone. Bring an address, share what the Oracle
+      returned, and weigh it with others before you commit.</p>
+
+    <ul>
+      <li>Pick a name (anything up to 24 chars) and write your message (up to 500 chars).</li>
+      <li>Messages stream in for everyone connected. Recent messages are kept in memory and replayed.</li>
+      <li>Rate-limited per IP so the channel stays readable.</li>
+    </ul>
+
+    <a class="cta ghost" href="/communion">Enter the broadcast →</a>
+  </section>
+
+  <!-- =============================================== DOCTRINE / LORE -->
+  <section id="doctrine">
+    <div class="kicker">The Rite · Doctrine</div>
+    <h2>The doctrine beneath the oracle</h2>
+    <p class="muted">PLEROMA borrows the language of Gnosticism because the situation rhymes with it.
+      The chain is a world of appearances; most of what you're shown about a token is crafted to deceive.</p>
+
+    <h3 style="margin-top:1.2rem">The Fullness (Pleroma)</h3>
+    <p>The Fullness is what is real and verifiable — the on-chain facts no one can fake: who holds the
+      supply, whether the mint is sealed, whether liquidity can be pulled. The Oracle's whole purpose
+      is to bring this Fullness into language anyone can act on.</p>
+
+    <h3 style="margin-top:1.2rem">The Demiurge</h3>
+    <p>The Demiurge is the maker of illusions — the hype, the borrowed name, the chart inflated by
+      bots, the contract that reads friendly and behaves otherwise. Every Illusion verdict is the
+      Demiurge's hand caught in the light.</p>
+
+    <h3 style="margin-top:1.2rem">Gnosis</h3>
+    <p>Gnosis is direct knowledge of the thing itself, not the story told about it. The Oracle does
+      not predict price and it does not bless a buy. It lifts the veil so you decide with open eyes.</p>
+
+    <h3 style="margin-top:1.2rem">The faithful</h3>
+    <p>The community of those who choose to see — the ones who consult before they commit, who post
+      their readings in the Communion, who add to the Annals. The Demiurge thrives on isolated victims;
+      the faithful break the spell by sharing what they see.</p>
+
+    <div class="callout"><b>The First Principle.</b> The material world is built of illusions.
+      Pleroma reveals the light behind them.</div>
+  </section>
+
+  <!-- =============================================== TOKEN -->
+  <section id="token">
+    <div class="kicker">The Token</div>
+    <h2>$PLEROMA</h2>
+    <p class="muted">The token aligns the community around the oracle. Holding is not required to
+      consult — the readings are open to all — but it carries the project's governance and access to
+      the Communion's deeper rites. The sticky banner at the top of every page shows live market data
+      for the token, refreshed every 30 seconds.</p>
+
+    <div class="callout">
+      <b>Contract address</b><br>
+      <code id="ca-inline">To be inscribed at launch — see the banner above on the Oracle page</code><br>
+      <span class="muted" style="font-size:.86rem">Always verify the contract here before you trade
+        it anywhere. Run it through the Oracle first.</span>
+    </div>
+
+    <a class="cta ghost" href="/#oracle">Read $PLEROMA in the Oracle →</a>
+  </section>
+
+  <!-- =============================================== API -->
+  <section id="api">
+    <div class="kicker">For builders</div>
+    <h2>The API</h2>
+    <p class="muted">The same backend that powers the site is a clean JSON API. CORS is open by
+      default; rate-limited per IP (30/min). Everything runs same-origin against
+      <code>https://pleroma.fun</code> (or your own deploy).</p>
+
+    <div class="table-wrap">
+    <table class="api">
+      <thead><tr><th>Method</th><th>Path</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td class="meth">POST</td><td class="path">/oracle</td><td class="desc">Main verdict endpoint. Body: <code>{"query":"&lt;address or question&gt;"}</code>. Returns the full verdict JSON.</td></tr>
+        <tr><td class="meth">GET</td><td class="path">/api/token/{ca}</td><td class="desc">JSON verdict for a specific token mint.</td></tr>
+        <tr><td class="meth">GET</td><td class="path">/api/wallet/{addr}</td><td class="desc">JSON verdict for a specific wallet.</td></tr>
+        <tr><td class="meth">GET</td><td class="path">/api/leaderboard?verdict=&amp;limit=</td><td class="desc">Top entries. <code>verdict=emanation|illusion</code>, <code>limit</code> up to 50.</td></tr>
+        <tr><td class="meth">GET</td><td class="path">/api/alerts/recent?limit=</td><td class="desc">Recent high-clarity illusion alerts, newest-first.</td></tr>
+        <tr><td class="meth">WS</td><td class="path">/alerts/ws</td><td class="desc">Live broadcast of new illusions as they happen.</td></tr>
+        <tr><td class="meth">GET</td><td class="path">/token/stats</td><td class="desc">Live market data for the $PLEROMA token banner.</td></tr>
+        <tr><td class="meth">GET</td><td class="path">/health</td><td class="desc">Liveness + whether the LLM key is set.</td></tr>
+        <tr><td class="meth">GET</td><td class="path">/communion/messages?after=</td><td class="desc">Poll for new chat messages since the given id.</td></tr>
+        <tr><td class="meth">POST</td><td class="path">/communion/post</td><td class="desc">Post a message. Body: <code>{"name":"...","text":"..."}</code>.</td></tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h3 style="margin-top:1.6rem">Verdict response shape</h3>
+<pre><code>{
+  "verdict":   "emanation" | "illusion" | "veiled",
+  "title":     "SHORT ALL-CAPS PHRASE",
+  "clarity":   0-100,
+  "reading":   "2-3 sentence prose",
+  "signals":   [{"name":"...","icon":"holders|liquidity|deployer|hype|origin|snare|veil",
+                 "state":"light|shadow|unknown","note":"one line"}],
+  "meta":      { name, symbol, image, description, socials },     // tokens only
+  "stats":     { price_usd, market_cap, liquidity_usd, ... },     // tokens only
+  "holders":   [ { label, pct, flag } ],                          // tokens only
+  "identity":  { sol_domains, total_usd, tokens, images, ... },   // wallets only
+  "kind":      "token" | "wallet" | "question" | "notfound",
+  "address":   "&lt;the address that was read&gt;"
+}</code></pre>
+
+    <h3 style="margin-top:1.4rem">Example</h3>
+<pre><code>curl -X POST https://pleroma.fun/oracle \
+  -H 'Content-Type: application/json' \
+  -d '{"query":"So11111111111111111111111111111111111111112"}'</code></pre>
+
+    <p class="muted">Returns the full verdict on Wrapped SOL — verdict, clarity, signals, lore, holders, and a market snapshot.</p>
+  </section>
+
+  <!-- =============================================== CONNECT -->
+  <section id="connect">
+    <div class="kicker">Connect</div>
+    <h2>Find the Fullness</h2>
+    <p class="muted">Follow the broadcast and bring questions.</p>
+    <a class="cta" href="https://x.com/Pleroma00" target="_blank" rel="noopener">X / Twitter →</a>
+    <a class="cta ghost" href="/#oracle">Open the Oracle →</a>
+  </section>
+
+  <!-- =============================================== FAQ -->
+  <section id="faq">
+    <div class="kicker">Plain answers</div>
+    <h2>FAQ</h2>
+    <dl class="faq">
+      <dt>Is a clean reading a guarantee it's safe?</dt>
+      <dd>No. An <span style="color:var(--gold)">Emanation</span> means no structural deceptions surfaced
+        in what could be verified — not that the project is honest. Teams, intentions, and off-chain
+        promises can't be read on-chain. Always do your own diligence.</dd>
+
+      <dt>Why does a verdict sometimes say "Veiled"?</dt>
+      <dd>Because too little could be verified — often a brand-new or pre-launch token with no pool
+        yet, or a temporary data outage. Low clarity, no judgment. Ask again later.</dd>
+
+      <dt>How does the Oracle decide if my input is an address or a question?</dt>
+      <dd>It scans your text for a base58 string of 32–44 characters that validates as a Solana public
+        key. If it finds one, it takes the address path; if not, it takes the question path. So
+        <em>"is So11111111111111111111111111111111111111112 safe?"</em> still reads as the address.</dd>
+
+      <dt>Where does the lore (description and socials) come from?</dt>
+      <dd>On-chain Metaplex metadata gives the name, symbol, and a link to the off-chain metadata;
+        the Oracle follows that link and reads the description and socials from it, with DexScreener
+        as a second source.</dd>
+
+      <dt>How is wallet worth calculated?</dt>
+      <dd>Token balances come straight from the chain; USD prices come from Jupiter. Total worth is
+        SOL plus every token that has a market price. Illiquid tokens with no price are listed but
+        excluded from the total.</dd>
+
+      <dt>Can the AI make the Oracle say a coin is safe when it isn't?</dt>
+      <dd>No. The verdict is set by a deterministic rules engine before the AI is ever called. The AI
+        only writes the prose. If the AI is offline, a templated reading ships with the same verdict.</dd>
+
+      <dt>Why is the same token sometimes cached?</dt>
+      <dd>The backend caches each result for 45 seconds. If many users ask about the same token in
+        the same minute, the on-chain calls happen once. Ask again after the cache window to force
+        a fresh read.</dd>
+
+      <dt>Are alerts delayed?</dt>
+      <dd>No. The moment an Illusion is read with clarity ≥ 60, it broadcasts over WebSocket to every
+        client on the alerts page, and shows in browser notifications if you enabled them.</dd>
+
+      <dt>Does PLEROMA give financial advice?</dt>
+      <dd>No. It is an insight tool. Nothing here is financial advice, and no reading replaces your
+        own research.</dd>
+    </dl>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <span>© 2026 PLEROMA · The Fullness</span>
+    <span><a href="/">Oracle</a> · <a href="/leaderboard">Leaderboard</a> · <a href="/alerts">Alerts</a> · <a href="/communion">Communion</a> · <a href="https://x.com/Pleroma00" target="_blank" rel="noopener">X / Twitter</a> · Insight, not financial advice</span>
+  </div>
+</footer>
+
+</body>
+</html>

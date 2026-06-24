@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PLEROMA · Demiurge Alerts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0a0a; --panel:#141312; --panel-2:#1c1a17;
+    --gold:#F4C430; --gold-2:#FFD95A; --gold-deep:#C99A1E;
+    --paper:#F2ECDC; --mist:#9d978a; --dim:#6f6a5f;
+    --blood:#E5484D; --blood-2:#ff6b70; --ink:#0a0a0a;
+    --bw:3px; --hard:6px 6px 0 #000;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--paper);font-family:'Space Grotesk',system-ui,sans-serif;font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 clamp(1.1rem,4vw,2.2rem)}
+  .display{font-family:'Syne',sans-serif;font-weight:800;text-transform:uppercase;line-height:.96;letter-spacing:-.01em}
+  .mono{font-family:'Space Mono',monospace}
+
+  header.nav{position:sticky;top:0;z-index:60;background:var(--bg);border-bottom:var(--bw) solid var(--gold)}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:72px}
+  .brand{display:flex;align-items:center;gap:.7rem;text-decoration:none;color:var(--paper)}
+  .brand .box{width:40px;height:40px;border:var(--bw) solid var(--gold);display:flex;align-items:center;justify-content:center;color:var(--gold);background:var(--bg)}
+  .brand .box svg{width:24px;height:24px}
+  .brand .word{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;letter-spacing:.16em;text-transform:uppercase}
+  .nav-links{display:flex;align-items:center;gap:1.8rem}
+  .nav-links a{color:var(--paper);text-decoration:none;font-weight:500;font-size:.86rem;text-transform:uppercase;letter-spacing:.06em;transition:color .15s}
+  .nav-links a:hover{color:var(--gold)}
+  .btn{display:inline-flex;align-items:center;gap:.5rem;cursor:pointer;text-decoration:none;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.84rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ink);background:var(--gold);border:var(--bw) solid var(--ink);padding:.6rem 1.2rem;box-shadow:var(--hard);transition:transform .12s, box-shadow .12s}
+  .btn:hover{transform:translate(-2px,-2px);box-shadow:8px 8px 0 #000}
+  .btn svg{width:16px;height:16px;flex-shrink:0}
+  .btn.danger{background:var(--blood);color:var(--paper)}
+  .btn.ghost{background:var(--bg);color:var(--blood);border-color:var(--blood)}
+  @media(max-width:760px){.nav-links a:not(.btn){display:none}}
+
+  /* siren stripe */
+  .stripe{background:repeating-linear-gradient(45deg,var(--blood) 0 18px,var(--ink) 18px 36px);border-bottom:var(--bw) solid var(--ink);height:14px}
+
+  /* hero */
+  .hero{padding:clamp(2.4rem,5vw,4rem) 0 clamp(1.4rem,3vw,2rem);text-align:center}
+  .hero .eyebrow{display:inline-block;background:var(--blood);color:var(--paper);padding:.3rem .7rem;border:var(--bw) solid var(--ink);box-shadow:4px 4px 0 #000;font-family:'Space Mono',monospace;font-size:.72rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;margin-bottom:1.4rem}
+  .hero h1{font-size:clamp(2rem,5.6vw,3.6rem);color:var(--paper);max-width:18ch;margin:0 auto}
+  .hero h1 .u{background:var(--blood);color:var(--paper);padding:0 .2em;border:var(--bw) solid var(--ink);box-shadow:5px 5px 0 #000;display:inline-block;transform:rotate(-1deg)}
+  .hero p{color:var(--mist);max-width:54ch;margin:1.2rem auto 0;font-size:1.04rem;line-height:1.65}
+
+  /* controls */
+  .controls{display:flex;justify-content:center;gap:.6rem;flex-wrap:wrap;margin:1.6rem 0 2rem}
+  .conn{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:.6rem;margin-bottom:1.6rem;font-family:'Space Mono',monospace;font-size:.74rem;letter-spacing:.1em;text-transform:uppercase}
+  .conn .dot{width:12px;height:12px;background:var(--mist);display:inline-block;border-radius:50%}
+  .conn.live .dot{background:var(--blood);animation:pulse 1s ease infinite}
+  .conn .lbl{color:var(--dim)}
+  .conn.live .lbl{color:var(--blood)}
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.35);opacity:.5}}
+
+  /* feed */
+  .feed{display:flex;flex-direction:column;gap:1.1rem}
+  .alert{background:var(--panel);border:var(--bw) solid var(--blood);box-shadow:6px 6px 0 var(--blood);display:flex;flex-direction:column;text-decoration:none;color:inherit;transition:transform .12s,box-shadow .12s}
+  .alert:hover{transform:translate(-3px,-3px);box-shadow:9px 9px 0 var(--blood)}
+  .alert.new{animation:flash .8s ease}
+  @keyframes flash{0%{background:var(--blood)}30%{background:var(--blood)}100%{background:var(--panel)}}
+
+  .a-top{display:flex;align-items:stretch;border-bottom:var(--bw) solid var(--blood)}
+  .a-mark{flex-shrink:0;width:64px;display:flex;align-items:center;justify-content:center;background:var(--blood);color:var(--paper);position:relative}
+  .a-mark svg{width:30px;height:30px}
+  .a-mark::after{content:"";position:absolute;inset:0;border:2px solid var(--paper);opacity:.3;pointer-events:none}
+  .a-body{flex:1;min-width:0;padding:.9rem 1.1rem;display:flex;align-items:center;gap:.9rem}
+  .a-body img{flex-shrink:0;width:50px;height:50px;border:2px solid var(--blood);object-fit:cover;background:var(--panel)}
+  .a-ni{flex:1;min-width:0}
+  .a-name{font-family:'Syne',sans-serif;font-weight:800;text-transform:uppercase;font-size:1.18rem;color:var(--paper);line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .a-sym{font-family:'Space Mono',monospace;font-size:.74rem;color:var(--blood);margin-top:.2rem;letter-spacing:.08em}
+  .a-clar{flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 1rem;border-left:var(--bw) solid var(--blood)}
+  .a-clar .n{font-family:'Syne',sans-serif;font-weight:800;font-size:1.7rem;color:var(--blood);line-height:1}
+  .a-clar .c{font-family:'Space Mono',monospace;font-size:.6rem;color:var(--dim);letter-spacing:.14em;text-transform:uppercase;margin-top:.2rem}
+  @media(max-width:560px){.a-clar{display:none}.a-mark{width:50px}.a-mark svg{width:24px;height:24px}}
+
+  .a-title-row{padding:.9rem 1.1rem 0;font-family:'Syne',sans-serif;font-weight:800;text-transform:uppercase;font-size:1rem;color:var(--blood);letter-spacing:.02em}
+  .a-sigs{padding:.9rem 1.1rem;display:flex;flex-direction:column;gap:.45rem}
+  .a-sig{display:flex;gap:.5rem;align-items:flex-start;padding:.5rem .7rem;border:2px solid var(--blood);background:var(--bg);font-size:.84rem}
+  .a-sig .sn{font-weight:700;text-transform:uppercase;font-size:.74rem;color:var(--blood);letter-spacing:.06em;flex-shrink:0;min-width:8rem}
+  .a-sig .ss{color:var(--mist);line-height:1.4;flex:1}
+  @media(max-width:560px){.a-sig{flex-direction:column;gap:.2rem}.a-sig .sn{min-width:0}}
+
+  .a-foot{display:flex;justify-content:space-between;align-items:center;padding:.7rem 1.1rem;border-top:1px dashed var(--blood);font-family:'Space Mono',monospace;font-size:.7rem;color:var(--dim);letter-spacing:.06em;text-transform:uppercase}
+  .a-foot .ca{color:var(--paper)}
+  .a-foot .ago{color:var(--blood)}
+  .a-foot .open{color:var(--gold)}
+
+  .loading,.empty{padding:3rem 0;text-align:center;color:var(--mist);font-family:'Space Mono',monospace;letter-spacing:.06em;text-transform:uppercase;font-size:.84rem}
+  .loading .blk{width:10px;height:10px;background:var(--blood);display:inline-block;vertical-align:middle;margin-right:.5rem;animation:blink .9s steps(1) infinite}
+  @keyframes blink{50%{opacity:.2}}
+  .empty .ib{width:60px;height:60px;border:var(--bw) solid var(--gold);display:flex;align-items:center;justify-content:center;color:var(--gold);margin:0 auto 1.2rem}
+  .empty .ib svg{width:32px;height:32px}
+  .empty p{margin-top:.5rem;color:var(--dim);text-transform:none;letter-spacing:0;font-size:.9rem}
+
+  /* about box */
+  .about{margin-top:2.4rem;padding:1.4rem;border:var(--bw) solid var(--gold-deep);background:var(--panel-2)}
+  .about h3{font-family:'Syne',sans-serif;font-weight:800;text-transform:uppercase;font-size:.96rem;color:var(--gold);margin-bottom:.6rem;letter-spacing:.04em}
+  .about p{color:var(--mist);font-size:.88rem;line-height:1.6}
+  .about ul{margin:.6rem 0 0 1.2rem;color:var(--mist);font-size:.84rem;line-height:1.7}
+  .about strong{color:var(--paper)}
+
+  footer{border-top:var(--bw) solid var(--gold);padding:clamp(2rem,4vw,3rem) 0 2rem;margin-top:clamp(2rem,4vw,3rem);text-align:center;font-family:'Space Mono',monospace;font-size:.76rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em}
+  footer a{color:var(--gold);text-decoration:none;margin:0 .6rem}
+  footer a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-eye" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 24s8-13 21-13 21 13 21 13-8 13-21 13S3 24 3 24Z"/><circle cx="24" cy="24" r="7"/><circle cx="24" cy="24" r="2.6" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-cross" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 15 33 33M33 15 15 33"/></symbol>
+    <symbol id="i-warn" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M24 6 4 42h40L24 6Z"/><path d="M24 18v12"/><circle cx="24" cy="36" r="2" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 32V22a12 12 0 0 1 24 0v10l3 4H9l3-4Z"/><path d="M20 40a4 4 0 0 0 8 0"/></symbol>
+    <symbol id="i-aureole" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="9"/><path d="M24 2v7M24 39v7M2 24h7M39 24h7M8 8l5 5M40 8l-5 5M8 40l5-5M40 40l-5-5"/></symbol>
+  </defs>
+</svg>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="/"><span class="box"><svg><use href="#i-eye"/></svg></span><span class="word">Pleroma</span></a>
+    <nav class="nav-links">
+      <a href="/">Oracle</a>
+      <a href="/leaderboard">Leaderboard</a>
+      <a href="/alerts" style="color:var(--blood)">Alerts</a>
+      <a href="/docs">Docs</a>
+      <a class="btn" href="/">Consult →</a>
+    </nav>
+  </div>
+</header>
+
+<div class="stripe" aria-hidden="true"></div>
+
+<main class="wrap">
+  <section class="hero">
+    <span class="eyebrow">⚠ Demiurge Alerts</span>
+    <h1 class="display">The <span class="u">Illusions</span> revealed in real-time</h1>
+    <p>Whenever the Oracle uncovers a token with the Demiurge's hand on it at high clarity, the alert is broadcast here. Live. The faithful keep watch so you don't have to.</p>
+  </section>
+
+  <div class="conn" id="conn"><span class="dot"></span><span class="lbl" id="conn-lbl">Connecting to the channel…</span></div>
+
+  <div class="controls">
+    <button class="btn danger" id="notify-btn"><svg><use href="#i-bell"/></svg> Enable Browser Alerts</button>
+    <button class="btn ghost" id="sound-btn"><svg><use href="#i-warn"/></svg> Sound: Off</button>
+  </div>
+
+  <div id="loading" class="loading"><span class="blk"></span> Tuning the channel…</div>
+
+  <div id="empty" class="empty" style="display:none">
+    <div class="ib"><svg><use href="#i-aureole"/></svg></div>
+    <div>No illusions have been broadcast yet.</div>
+    <p>When the Oracle judges a token with the Demiurge's hand at clarity ≥ 60, it surfaces here automatically.</p>
+  </div>
+
+  <div id="feed" class="feed"></div>
+
+  <section class="about">
+    <h3>What lands here</h3>
+    <p>An alert fires when a token reading meets <strong>both</strong>:</p>
+    <ul>
+      <li>Verdict = <strong>Illusion of the Demiurge</strong> (concrete, verified deception markers — not just thin data).</li>
+      <li>Clarity score <strong>≥ 60</strong> — the Oracle is confident in what it sees.</li>
+    </ul>
+    <p style="margin-top:.7rem">The channel is live (WebSocket). Recent alerts are kept in memory and replayed when you open this page. New illusions arrive in real time as the faithful scan them.</p>
+  </section>
+</main>
+
+<footer>
+  <a href="/">Oracle</a>·<a href="/leaderboard">Leaderboard</a>·<a href="/alerts">Alerts</a>·<a href="/docs">Docs</a>·<a href="/communion">Communion</a>
+  <div style="margin-top:.8rem">© 2026 Pleroma · Insight, not financial advice</div>
+</footer>
+
+<script>
+const $ = s => document.querySelector(s);
+function esc(s){const d=document.createElement('div');d.textContent=s==null?'':String(s);return d.innerHTML;}
+function shorten(a){return a?a.slice(0,4)+'…'+a.slice(-4):'—';}
+function timeAgo(ts){
+  const now = Math.floor(Date.now()/1000);
+  const diff = Math.max(0, now - ts);
+  if(diff < 60) return diff+'s ago';
+  if(diff < 3600) return Math.floor(diff/60)+'m ago';
+  if(diff < 86400) return Math.floor(diff/3600)+'h ago';
+  return Math.floor(diff/86400)+'d ago';
+}
+
+const MAX_FEED = 60;
+const seen = new Set();
+let soundOn = false;
+let beepCtx = null;
+
+function beep(){
+  if(!soundOn) return;
+  try{
+    beepCtx = beepCtx || new (window.AudioContext||window.webkitAudioContext)();
+    const o = beepCtx.createOscillator();
+    const g = beepCtx.createGain();
+    o.type='square'; o.frequency.value=880;
+    g.gain.value=0.05;
+    o.connect(g); g.connect(beepCtx.destination);
+    o.start(); o.stop(beepCtx.currentTime+0.12);
+    setTimeout(()=>{ const o2=beepCtx.createOscillator(); const g2=beepCtx.createGain();
+      o2.type='square'; o2.frequency.value=660; g2.gain.value=0.05;
+      o2.connect(g2); g2.connect(beepCtx.destination); o2.start(); o2.stop(beepCtx.currentTime+0.12);
+    }, 140);
+  }catch(e){}
+}
+
+function renderAlert(a){
+  const img = a.image
+    ? '<img src="'+esc(a.image)+'" alt="" onerror="this.style.display=\'none\'">'
+    : '';
+  const sym = a.symbol ? '$'+esc(a.symbol) : '';
+  const sigs = (a.signals||[]).filter(s=>s.state==='shadow').slice(0,3).map(s=>
+    '<div class="a-sig"><span class="sn">'+esc(s.name||'')+'</span><span class="ss">'+esc(s.note||'')+'</span></div>'
+  ).join('');
+  return '<a class="alert" id="alert-'+esc(a.id)+'" href="/token/'+encodeURIComponent(a.ca)+'">'+
+    '<div class="a-top">'+
+      '<div class="a-mark"><svg><use href="#i-cross"/></svg></div>'+
+      '<div class="a-body">'+img+
+        '<div class="a-ni"><div class="a-name">'+esc(a.name||'Unknown')+'</div>'+
+        (sym?'<div class="a-sym">'+sym+'</div>':'')+'</div>'+
+      '</div>'+
+      '<div class="a-clar"><div class="n">'+(a.clarity!=null?a.clarity:'—')+'</div><div class="c">Clarity</div></div>'+
+    '</div>'+
+    (a.title?'<div class="a-title-row">'+esc(a.title)+'</div>':'')+
+    (sigs?'<div class="a-sigs">'+sigs+'</div>':'')+
+    '<div class="a-foot"><span class="ca">'+esc(shorten(a.ca))+'</span><span class="ago" data-ts="'+esc(a.ts)+'">'+esc(timeAgo(a.ts))+'</span><span class="open">Open Reading →</span></div>'+
+  '</a>';
+}
+
+function pushAlert(a, isNew){
+  if(seen.has(a.id)) return;
+  seen.add(a.id);
+  $('#empty').style.display='none';
+  const feed = $('#feed');
+  const html = renderAlert(a);
+  feed.insertAdjacentHTML('afterbegin', html);
+  // cap
+  while(feed.children.length > MAX_FEED) feed.removeChild(feed.lastChild);
+  if(isNew){
+    const el = $('#alert-'+a.id); if(el) el.classList.add('new');
+    notify(a);
+    beep();
+  }
+}
+
+function notify(a){
+  if(!('Notification' in window)) return;
+  if(Notification.permission !== 'granted') return;
+  try{
+    const n = new Notification('PLEROMA · Illusion detected', {
+      body: (a.name||'Unknown') + (a.symbol?' ($'+a.symbol+')':'') + ' — clarity ' + (a.clarity||'?'),
+      icon: a.image || '/favicon.ico',
+      tag: 'pleroma-'+a.id,
+    });
+    n.onclick = ()=>{ window.focus(); window.location.href='/token/'+encodeURIComponent(a.ca); };
+  }catch(e){}
+}
+
+async function loadRecent(){
+  try{
+    const r = await fetch('/api/alerts/recent?limit=40');
+    const d = await r.json();
+    $('#loading').style.display='none';
+    const alerts = (d && d.alerts) || [];
+    if(!alerts.length){ $('#empty').style.display=''; return; }
+    // server returns newest-first; render in reverse so insertAdjacentHTML('afterbegin') keeps newest at top
+    alerts.slice().reverse().forEach(a=>pushAlert(a, false));
+  }catch(e){
+    $('#loading').style.display='none';
+    $('#empty').style.display='';
+    $('#empty').querySelector('div').textContent = 'Could not reach the alert channel.';
+  }
+}
+
+function setConn(state, label){
+  const c = $('#conn'); c.classList.toggle('live', state==='live');
+  $('#conn-lbl').textContent = label;
+}
+
+let ws=null, retry=0;
+function connect(){
+  const proto = location.protocol==='https:' ? 'wss:' : 'ws:';
+  const url = proto+'//'+location.host+'/alerts/ws';
+  try{
+    ws = new WebSocket(url);
+    ws.onopen = ()=>{ retry=0; setConn('live', 'Channel open — listening for illusions'); };
+    ws.onmessage = (ev)=>{ try{ const a = JSON.parse(ev.data); pushAlert(a, true); }catch(e){} };
+    ws.onclose = ()=>{
+      setConn('off', 'Channel closed — reconnecting…');
+      retry = Math.min(retry+1, 6);
+      setTimeout(connect, 1000 * Math.pow(2, retry));
+    };
+    ws.onerror = ()=>{ try{ ws.close(); }catch(e){} };
+  }catch(e){
+    setConn('off', 'Cannot reach the channel');
+    setTimeout(connect, 5000);
+  }
+}
+
+// notify button
+$('#notify-btn').addEventListener('click', async ()=>{
+  if(!('Notification' in window)){ alert('This browser does not support notifications.'); return; }
+  const p = await Notification.requestPermission();
+  const btn = $('#notify-btn');
+  if(p === 'granted'){ btn.innerHTML='<svg><use href="#i-bell"/></svg> Browser Alerts: On'; btn.disabled=true; btn.style.opacity='.7'; }
+  else{ btn.innerHTML='<svg><use href="#i-bell"/></svg> Permission Denied'; }
+});
+
+if('Notification' in window && Notification.permission === 'granted'){
+  const btn = $('#notify-btn');
+  btn.innerHTML='<svg><use href="#i-bell"/></svg> Browser Alerts: On'; btn.disabled=true; btn.style.opacity='.7';
+}
+
+// sound button
+$('#sound-btn').addEventListener('click', ()=>{
+  soundOn = !soundOn;
+  $('#sound-btn').innerHTML='<svg><use href="#i-warn"/></svg> Sound: '+(soundOn?'On':'Off');
+  if(soundOn) beep();
+});
+
+// refresh ago labels
+setInterval(()=>{
+  document.querySelectorAll('.a-foot .ago').forEach(el=>{
+    const ts = Number(el.dataset.ts);
+    if(ts) el.textContent = timeAgo(ts);
+  });
+}, 15000);
+
+loadRecent();
+connect();
+</script>
+</body>
+</html>

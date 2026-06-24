@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PLEROMA · Token Verdict</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<meta property="og:title" id="og-title" content="PLEROMA · Token Verdict" />
+<meta property="og:description" id="og-desc" content="The Oracle's reading on this token." />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+<style>
+  :root{
+    --bg:#0a0a0a; --panel:#141312; --panel-2:#1c1a17;
+    --gold:#F4C430; --gold-2:#FFD95A; --gold-deep:#C99A1E;
+    --paper:#F2ECDC; --mist:#9d978a; --dim:#6f6a5f;
+    --blood:#E5484D; --ink:#0a0a0a;
+    --bw:3px; --hard:6px 6px 0 #000; --hard-gold:6px 6px 0 var(--gold);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--paper);font-family:'Space Grotesk',system-ui,sans-serif;font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  .wrap{max-width:1140px;margin:0 auto;padding:0 clamp(1.1rem,4vw,2.2rem)}
+  .display{font-family:'Syne',sans-serif;font-weight:800;text-transform:uppercase;line-height:.96;letter-spacing:-.01em}
+  .mono{font-family:'Space Mono',monospace}
+  .eyebrow{font-family:'Space Mono',monospace;font-size:.72rem;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--gold)}
+
+  header.nav{position:sticky;top:0;z-index:60;background:var(--bg);border-bottom:var(--bw) solid var(--gold)}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:72px}
+  .brand{display:flex;align-items:center;gap:.7rem;text-decoration:none;color:var(--paper)}
+  .brand .box{width:40px;height:40px;border:var(--bw) solid var(--gold);display:flex;align-items:center;justify-content:center;color:var(--gold);background:var(--bg)}
+  .brand .box svg{width:24px;height:24px}
+  .brand .word{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;letter-spacing:.16em;text-transform:uppercase}
+  .nav-links{display:flex;align-items:center;gap:1.8rem}
+  .nav-links a{color:var(--paper);text-decoration:none;font-weight:500;font-size:.86rem;text-transform:uppercase;letter-spacing:.06em;transition:color .15s}
+  .nav-links a:hover{color:var(--gold)}
+  .btn{display:inline-flex;align-items:center;gap:.5rem;cursor:pointer;text-decoration:none;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.84rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ink);background:var(--gold);border:var(--bw) solid var(--ink);padding:.6rem 1.2rem;box-shadow:var(--hard);transition:transform .12s, box-shadow .12s}
+  .btn:hover{transform:translate(-2px,-2px);box-shadow:8px 8px 0 #000}
+  .btn:active{transform:translate(3px,3px);box-shadow:2px 2px 0 #000}
+  .btn svg{width:16px;height:16px;flex-shrink:0}
+  .btn.ghost{background:var(--bg);color:var(--gold);border-color:var(--gold)}
+  @media(max-width:760px){.nav-links a:not(.btn){display:none}}
+
+  .crumb{font-family:'Space Mono',monospace;font-size:.74rem;color:var(--dim);text-transform:uppercase;letter-spacing:.12em;margin:1.8rem 0 1rem}
+  .crumb a{color:var(--gold);text-decoration:none}
+  .crumb a:hover{text-decoration:underline}
+
+  /* --- loading state --- */
+  .loading{display:flex;align-items:center;gap:1rem;padding:3rem 0;color:var(--gold);font-family:'Space Mono',monospace;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+  .loading .blk{width:14px;height:14px;background:var(--gold);animation:blink .9s steps(1) infinite}
+  @keyframes blink{50%{opacity:.2}}
+
+  /* --- verdict hero --- */
+  .vhero{margin-top:1rem;background:var(--panel);border:var(--bw) solid var(--gold);box-shadow:var(--hard-gold)}
+  .vhero.illusion{border-color:var(--blood);box-shadow:6px 6px 0 var(--blood)}
+  .vhero.veiled{border-color:var(--mist);box-shadow:6px 6px 0 var(--mist)}
+  .vhero-top{display:flex;align-items:stretch;gap:0;border-bottom:var(--bw) solid var(--gold)}
+  .vhero.illusion .vhero-top{border-color:var(--blood)}
+  .vhero.veiled .vhero-top{border-color:var(--mist)}
+  .vhero-mark{flex-shrink:0;width:90px;display:flex;align-items:center;justify-content:center;background:var(--gold);color:var(--ink)}
+  .vhero.illusion .vhero-mark{background:var(--blood)}
+  .vhero.veiled .vhero-mark{background:var(--mist)}
+  .vhero-mark svg{width:44px;height:44px}
+  .vhero-body{flex:1;min-width:0;padding:1.2rem 1.4rem;display:flex;align-items:center;gap:1.2rem}
+  .vhero-img{flex-shrink:0;width:64px;height:64px;border:var(--bw) solid var(--gold);object-fit:cover;background:var(--panel)}
+  .vhero-name-wrap{flex:1;min-width:0}
+  .vhero-name{font-family:'Syne',sans-serif;font-weight:800;text-transform:uppercase;font-size:clamp(1.5rem,3.6vw,2.4rem);line-height:1;color:var(--paper);word-break:break-word}
+  .vhero-sym{font-family:'Space Mono',monospace;font-size:.86rem;color:var(--gold);margin-top:.35rem;letter-spacing:.1em}
+  .vhero-clarity{flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 1.4rem;border-left:var(--bw) solid var(--gold)}
+  .vhero.illusion .vhero-clarity{border-color:var(--blood)}
+  .vhero.veiled .vhero-clarity{border-color:var(--mist)}
+  .vhero-clarity .num{font-family:'Syne',sans-serif;font-weight:800;font-size:2.8rem;line-height:1;color:var(--gold)}
+  .vhero.illusion .vhero-clarity .num{color:var(--blood)}
+  .vhero.veiled .vhero-clarity .num{color:var(--paper)}
+  .vhero-clarity .cap{font-family:'Space Mono',monospace;font-size:.62rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-top:.3rem}
+  @media(max-width:640px){.vhero-clarity{display:none}.vhero-mark{width:70px}.vhero-mark svg{width:32px;height:32px}.vhero-img{width:50px;height:50px}}
+  .v-kicker{font-family:'Space Mono',monospace;font-size:.66rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--mist);padding:1rem 1.4rem 0}
+  .v-title{font-family:'Syne',sans-serif;font-weight:800;text-transform:uppercase;font-size:clamp(1.6rem,4vw,2.4rem);line-height:1;padding:.3rem 1.4rem 0;color:var(--gold)}
+  .vhero.illusion .v-title{color:var(--blood)}
+  .vhero.veiled .v-title{color:var(--paper)}
+  .reading{padding:1.2rem 1.4rem;color:var(--paper);font-size:1.04rem;line-height:1.7}
+
+  /* --- CA bar --- */
+  .cabox{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;margin:0 1.4rem 1.4rem;border:var(--bw) solid var(--gold-deep);background:var(--bg);padding:.7rem .9rem}
+  .cabox .calabel{font-family:'Space Mono',monospace;font-size:.62rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+  .cabox .caval{flex:1;min-width:8rem;font-family:'Space Mono',monospace;font-size:.82rem;color:var(--paper);word-break:break-all}
+  .cabox .cacopy{cursor:pointer;font-family:'Space Mono',monospace;font-weight:700;font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ink);background:var(--gold);border:2px solid var(--ink);padding:.35rem .7rem;box-shadow:3px 3px 0 #000;transition:transform .1s,box-shadow .1s}
+  .cabox .cacopy:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 #000}
+  .cabox .cacopy.done{background:var(--paper)}
+
+  /* --- two-column layout --- */
+  .twocol{display:grid;grid-template-columns:2fr 1fr;gap:1.6rem;margin-top:2rem}
+  @media(max-width:980px){.twocol{grid-template-columns:1fr}}
+  .col-stack{display:flex;flex-direction:column;gap:1.6rem}
+
+  /* --- panels --- */
+  .panel{background:var(--panel);border:var(--bw) solid var(--gold);box-shadow:var(--hard-gold)}
+  .panel-h{display:flex;align-items:center;justify-content:space-between;gap:.7rem;padding:.7rem 1rem;background:var(--gold);border-bottom:var(--bw) solid var(--ink)}
+  .panel-h .t{font-family:'Space Mono',monospace;font-weight:700;font-size:.74rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink)}
+  .panel-h .x{font-family:'Space Mono',monospace;font-size:.66rem;color:var(--ink);font-weight:700;letter-spacing:.08em}
+  .panel-b{padding:1.2rem}
+
+  /* --- market tiles --- */
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(108px,1fr));gap:1px;background:var(--gold-deep)}
+  .tile{background:var(--bg);padding:.85rem .9rem}
+  .tile .tl{font-family:'Space Mono',monospace;font-size:.6rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--mist)}
+  .tile .tv{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:var(--gold);margin-top:.3rem;line-height:1}
+  .tile.danger .tv{color:var(--blood)}
+
+  /* --- signals --- */
+  .signals{display:flex;flex-direction:column;gap:.7rem}
+  .signal{display:flex;align-items:flex-start;gap:.85rem;padding:.8rem .95rem;border:var(--bw) solid var(--gold-deep);background:var(--bg)}
+  .signal .sicon{flex-shrink:0;width:24px;height:24px;margin-top:.05rem}
+  .signal .sbody{flex:1;min-width:0}
+  .signal .sname{font-weight:700;font-size:.92rem;text-transform:uppercase;letter-spacing:.02em}
+  .signal .snote{color:var(--mist);font-size:.86rem;margin-top:.15rem;line-height:1.5}
+  .signal .sstate{flex-shrink:0;font-family:'Space Mono',monospace;font-weight:700;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;padding:.3rem .55rem;border:2px solid currentColor;margin-top:.1rem}
+  .s-light{border-color:var(--gold)} .s-light .sicon,.s-light .sstate{color:var(--gold)}
+  .s-shadow{border-color:var(--blood)} .s-shadow .sicon,.s-shadow .sstate{color:var(--blood)}
+  .s-unknown{border-color:var(--mist)} .s-unknown .sicon,.s-unknown .sstate{color:var(--mist)}
+
+  /* --- holders --- */
+  .holder{display:flex;align-items:center;gap:.7rem;padding:.55rem 0;border-bottom:1px dashed var(--gold-deep)}
+  .holder:last-child{border-bottom:none}
+  .holder .rank{font-family:'Space Mono',monospace;font-size:.72rem;color:var(--dim);width:1.6rem}
+  .holder .addr{font-family:'Space Mono',monospace;font-size:.8rem;color:var(--paper);min-width:7.5rem}
+  .holder .bar{flex:1;height:10px;background:var(--bg);border:1px solid var(--gold-deep);position:relative;overflow:hidden}
+  .holder .bar i{position:absolute;left:0;top:0;bottom:0;background:var(--gold);display:block}
+  .holder.whale .bar i,.holder.insider .bar i{background:var(--blood)}
+  .holder .pct{font-family:'Space Mono',monospace;font-weight:700;font-size:.78rem;color:var(--gold);width:3.6rem;text-align:right}
+  .holder.whale .pct,.holder.insider .pct{color:var(--blood)}
+  .holder .tag{font-family:'Space Mono',monospace;font-size:.6rem;text-transform:uppercase;letter-spacing:.1em;color:var(--blood);border:1px solid var(--blood);padding:.1rem .3rem}
+
+  /* --- lore --- */
+  .lore-top{display:flex;gap:.9rem;align-items:center;margin-bottom:.8rem}
+  .lore-top img{width:54px;height:54px;border:var(--bw) solid var(--gold);object-fit:cover;background:var(--panel)}
+  .lore-name{font-family:'Syne',sans-serif;font-weight:800;text-transform:uppercase;font-size:1.15rem;color:var(--paper);line-height:1}
+  .lore-sym{font-family:'Space Mono',monospace;font-size:.72rem;color:var(--gold);margin-top:.25rem;letter-spacing:.08em}
+  .lore-desc{color:var(--mist);font-size:.92rem;line-height:1.55;white-space:pre-wrap}
+  .socials{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.9rem}
+  .socials a{display:inline-flex;align-items:center;gap:.4rem;font-family:'Space Mono',monospace;font-weight:700;font-size:.74rem;text-transform:uppercase;letter-spacing:.04em;text-decoration:none;color:var(--ink);background:var(--gold);border:var(--bw) solid var(--ink);padding:.4rem .75rem;box-shadow:3px 3px 0 #000;transition:transform .1s,box-shadow .1s}
+  .socials a:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 #000}
+  .socials a svg{width:13px;height:13px}
+
+  /* --- chart embed --- */
+  .chart-wrap{position:relative;width:100%;aspect-ratio:16/10;background:var(--bg);border:none;overflow:hidden}
+  .chart-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+
+  /* --- share strip --- */
+  .share{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:1.6rem}
+
+  /* --- failure / 404 --- */
+  .fail{margin:3rem 0;padding:2rem;border:var(--bw) solid var(--blood);background:var(--panel)}
+  .fail h2{font-family:'Syne',sans-serif;font-weight:800;text-transform:uppercase;color:var(--blood);font-size:1.6rem;margin-bottom:.6rem}
+  .fail p{color:var(--mist);font-size:1rem;line-height:1.6}
+  .fail .btn{margin-top:1.2rem}
+
+  footer{border-top:var(--bw) solid var(--gold);padding:clamp(2rem,4vw,3rem) 0 2rem;margin-top:clamp(2rem,4vw,3rem);text-align:center;font-family:'Space Mono',monospace;font-size:.76rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em}
+  footer a{color:var(--gold);text-decoration:none;margin:0 .6rem}
+  footer a:hover{text-decoration:underline}
+
+  a:focus-visible,button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+  @media(prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important;scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-eye" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 24s8-13 21-13 21 13 21 13-8 13-21 13S3 24 3 24Z"/><circle cx="24" cy="24" r="7"/><circle cx="24" cy="24" r="2.6" fill="currentColor" stroke="none"/>
+    </symbol>
+    <symbol id="i-check" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M13 24.5 21 32l14-15"/></symbol>
+    <symbol id="i-cross" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 15 33 33M33 15 15 33"/></symbol>
+    <symbol id="i-veil" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M24 13v22M13 24h22" opacity=".5"/><circle cx="24" cy="24" r="14" stroke-dasharray="4 5"/></symbol>
+    <symbol id="i-hand" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 24v-9a3 3 0 0 1 6 0v7M20 22v-3a3 3 0 0 1 6 0v3M26 22a3 3 0 0 1 6 0v9c0 6-4 11-11 11s-11-4-13-10l-2-6a3 3 0 0 1 5-2l3 4"/><circle cx="21" cy="14" r="3"/></symbol>
+    <symbol id="i-seal" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="11" y="21" width="26" height="20" rx="1"/><path d="M16 21v-5a8 8 0 0 1 16 0v5"/><circle cx="24" cy="30" r="2.4"/><path d="M24 32.4V36"/></symbol>
+    <symbol id="i-serpent" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 14c6 0 6 8 12 8s6-8 12-8 8 4 8 10-4 12-10 12"/><path d="M10 36c-1.5-1.5-2-3.5-2-5"/><circle cx="10" cy="11.5" r="1.8" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-vesica" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="18" cy="24" r="13"/><circle cx="30" cy="24" r="13"/><circle cx="24" cy="24" r="13" opacity=".5"/></symbol>
+    <symbol id="i-ouroboros" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M24 6a18 18 0 1 1-9 33.5"/><path d="m13 33 2.5 7.5L23 38"/><circle cx="24" cy="6" r="2.4" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.66l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.45-6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77Z"/></symbol>
+    <symbol id="i-tg" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M21.94 4.3 18.9 19.05c-.23 1.02-.84 1.27-1.7.79l-4.7-3.47-2.27 2.18c-.25.25-.46.46-.94.46l.33-4.78 8.7-7.86c.38-.34-.08-.53-.59-.19L6.78 13.1l-4.64-1.45c-1.01-.31-1.03-1.01.21-1.5L20.6 2.86c.84-.31 1.57.19 1.34 1.44Z"/></symbol>
+    <symbol id="i-discord" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M20.3 4.4A19 19 0 0 0 15.6 3l-.24.48a17.6 17.6 0 0 1 4.16 1.3 16.8 16.8 0 0 0-14.06 0A17.6 17.6 0 0 1 9.64 3.5L9.4 3a19 19 0 0 0-4.7 1.4C1.7 8.86.9 13.2 1.3 17.5a19 19 0 0 0 5.8 2.92l.46-.64a12.5 12.5 0 0 1-1.96-.95l.48-.36a13.4 13.4 0 0 0 11.45 0l.48.36c-.62.37-1.28.69-1.97.95l.47.64a19 19 0 0 0 5.8-2.92c.47-5-.8-9.3-3.4-13.1ZM8.4 14.9c-1.13 0-2.06-1.04-2.06-2.32S7.25 10.26 8.4 10.26c1.16 0 2.08 1.05 2.06 2.32 0 1.28-.91 2.32-2.06 2.32Zm7.2 0c-1.13 0-2.06-1.04-2.06-2.32s.91-2.32 2.06-2.32c1.16 0 2.08 1.05 2.06 2.32 0 1.28-.9 2.32-2.06 2.32Z"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v16h16"/><path d="M7 14l3-4 3 3 4-6"/></symbol>
+    <symbol id="i-scan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.3-4.3"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  </defs>
+</svg>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="/">
+      <span class="box"><svg><use href="#i-eye"/></svg></span>
+      <span class="word">Pleroma</span>
+    </a>
+    <nav class="nav-links">
+      <a href="/">Oracle</a>
+      <a href="/leaderboard">Leaderboard</a>
+      <a href="/alerts">Alerts</a>
+      <a href="/docs">Docs</a>
+      <a class="btn" href="/">Consult →</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="crumb">
+    <a href="/">Oracle</a> &nbsp;›&nbsp; <span>Token</span> &nbsp;›&nbsp; <span id="crumb-ca" class="mono"></span>
+  </div>
+
+  <div id="loading" class="loading"><span class="blk"></span><span>The Oracle is reading the token…</span></div>
+
+  <div id="fail" class="fail" style="display:none">
+    <h2>The Veil Holds</h2>
+    <p id="fail-msg">This address could not be read.</p>
+    <a class="btn" href="/"><svg><use href="#i-arrow"/></svg> Return to the Oracle</a>
+  </div>
+
+  <article id="content" style="display:none">
+    <section class="vhero" id="vhero">
+      <div class="vhero-top">
+        <div class="vhero-mark"><svg id="v-mark"><use href="#i-check"/></svg></div>
+        <div class="vhero-body">
+          <img id="v-img" class="vhero-img" alt="" style="display:none" />
+          <div class="vhero-name-wrap">
+            <div class="vhero-name" id="v-name">—</div>
+            <div class="vhero-sym" id="v-sym"></div>
+          </div>
+        </div>
+        <div class="vhero-clarity"><div class="num" id="v-clarity">—</div><div class="cap">Clarity</div></div>
+      </div>
+      <div class="v-kicker" id="v-kicker">The Oracle has spoken</div>
+      <div class="v-title" id="v-title">—</div>
+      <p class="reading" id="v-reading"></p>
+      <div class="cabox">
+        <span class="calabel">Contract</span>
+        <span class="caval" id="v-ca"></span>
+        <button class="cacopy" id="v-copy">Copy</button>
+      </div>
+    </section>
+
+    <div class="twocol">
+      <div class="col-stack">
+        <section class="panel" id="market-panel" style="display:none">
+          <div class="panel-h"><span class="t">Market</span><span class="x" id="market-x">Live</span></div>
+          <div class="panel-b"><div id="tiles" class="tiles"></div></div>
+        </section>
+
+        <section class="panel" id="chart-panel" style="display:none">
+          <div class="panel-h"><span class="t">Chart · DexScreener</span><a class="x" href="#" id="chart-link" target="_blank" rel="noopener" style="text-decoration:none">Open ↗</a></div>
+          <div class="chart-wrap" id="chart-wrap"></div>
+        </section>
+
+        <section class="panel" id="signals-panel">
+          <div class="panel-h"><span class="t">The Signals</span><span class="x">Verified</span></div>
+          <div class="panel-b"><div id="signals" class="signals"></div></div>
+        </section>
+      </div>
+
+      <div class="col-stack">
+        <section class="panel" id="lore-panel" style="display:none">
+          <div class="panel-h"><span class="t">The Lore</span></div>
+          <div class="panel-b" id="lore-body"></div>
+        </section>
+
+        <section class="panel" id="holders-panel" style="display:none">
+          <div class="panel-h"><span class="t">Top 10 Holders</span></div>
+          <div class="panel-b" id="holders-body"></div>
+        </section>
+      </div>
+    </div>
+
+    <div class="share">
+      <button class="btn" id="share-x"><svg><use href="#i-x"/></svg> Share on X</button>
+      <button class="btn ghost" id="copy-link"><svg><use href="#i-share"/></svg> Copy Permalink</button>
+      <a class="btn ghost" id="open-dex" href="#" target="_blank" rel="noopener"><svg><use href="#i-chart"/></svg> DexScreener</a>
+      <a class="btn ghost" id="open-solscan" href="#" target="_blank" rel="noopener"><svg><use href="#i-scan"/></svg> Solscan</a>
+    </div>
+  </article>
+</main>
+
+<footer>
+  <a href="/">Oracle</a>·<a href="/leaderboard">Leaderboard</a>·<a href="/alerts">Alerts</a>·<a href="/docs">Docs</a>·<a href="/communion">Communion</a>
+  <div style="margin-top:.8rem">© 2026 Pleroma · Insight, not financial advice</div>
+</footer>
+
+<script>
+const $ = s => document.querySelector(s);
+const ICONS={holders:'i-hand',liquidity:'i-seal',deployer:'i-serpent',hype:'i-veil',origin:'i-vesica',snare:'i-ouroboros',veil:'i-veil'};
+function esc(s){const d=document.createElement('div');d.textContent=s==null?'':String(s);return d.innerHTML;}
+function compact(n){if(n==null)return null;n=Number(n);if(n>=1e9)return '$'+(n/1e9).toFixed(2)+'B';if(n>=1e6)return '$'+(n/1e6).toFixed(2)+'M';if(n>=1e3)return '$'+(n/1e3).toFixed(1)+'K';return '$'+n.toLocaleString(undefined,{maximumFractionDigits:n<1?6:2});}
+function shorten(a){return a?a.slice(0,4)+'…'+a.slice(-4):'—';}
+
+const path = window.location.pathname.replace(/\/+$/,'');
+const ca = path.split('/').pop();
+
+function fail(msg){
+  $('#loading').style.display='none';
+  $('#fail').style.display='block';
+  $('#fail-msg').textContent = msg || 'This address could not be read.';
+}
+
+async function load(){
+  if(!ca || ca.length < 32){ fail('No token address in the URL.'); return; }
+  $('#crumb-ca').textContent = shorten(ca);
+  try{
+    const res = await fetch('/api/token/'+encodeURIComponent(ca));
+    if(res.status === 404){ fail('This address is not a token mint, or no account exists for it.'); return; }
+    if(!res.ok){ fail('The Oracle channel is clouded. Try again shortly.'); return; }
+    const d = await res.json();
+    render(d);
+  }catch(e){ fail('Could not reach the Oracle: '+(e.message||'unknown')); }
+}
+
+function render(r){
+  $('#loading').style.display='none';
+  $('#content').style.display='block';
+
+  const v = ['emanation','illusion','veiled'].includes(r.verdict) ? r.verdict : 'veiled';
+  const hero = $('#vhero');
+  hero.className = 'vhero ' + v;
+  $('#v-mark').innerHTML = '<use href="#' + (v==='emanation'?'i-check':v==='illusion'?'i-cross':'i-veil') + '"/>';
+
+  const meta = r.meta || {};
+  const name = meta.name || 'Unknown Token';
+  const sym  = meta.symbol ? '$' + meta.symbol : '';
+  $('#v-name').textContent = name;
+  $('#v-sym').textContent = sym;
+  if(meta.image){
+    const img = $('#v-img'); img.src = meta.image; img.style.display = ''; img.onerror = ()=>{ img.style.display='none'; };
+  }
+  $('#v-clarity').textContent = (typeof r.clarity === 'number') ? r.clarity : '—';
+  $('#v-title').textContent = r.title || (v==='emanation'?'EMANATION OF THE FULLNESS':v==='illusion'?'ILLUSION OF THE DEMIURGE':'VEILED IN SHADOW');
+  $('#v-reading').textContent = r.reading || '';
+  $('#v-ca').textContent = r.address || ca;
+
+  // copy
+  const copyBtn = $('#v-copy');
+  copyBtn.addEventListener('click', ()=>{
+    try{ navigator.clipboard.writeText(r.address||ca); }catch(e){}
+    copyBtn.textContent='Copied ✓'; copyBtn.classList.add('done');
+    setTimeout(()=>{ copyBtn.textContent='Copy'; copyBtn.classList.remove('done'); },1400);
+  });
+
+  // og tags
+  document.title = name + ' · ' + (r.title||'PLEROMA Verdict') + ' · PLEROMA';
+  $('#og-title').setAttribute('content', name + ' · ' + (r.title||'PLEROMA Verdict'));
+  if(r.reading) $('#og-desc').setAttribute('content', r.reading);
+
+  // signals
+  const sigWrap = $('#signals'); sigWrap.innerHTML='';
+  (r.signals||[]).forEach(s=>{
+    const state = ['light','shadow','unknown'].includes(s.state)?s.state:'unknown';
+    const icon = ICONS[s.icon] || 'i-veil';
+    const row = document.createElement('div'); row.className='signal s-'+state;
+    row.innerHTML='<svg class="sicon"><use href="#'+icon+'"/></svg><div class="sbody"><div class="sname">'+esc(s.name||'')+'</div><div class="snote">'+esc(s.note||'')+'</div></div><span class="sstate">'+(state==='light'?'Light':state==='shadow'?'Shadow':'Veiled')+'</span>';
+    sigWrap.appendChild(row);
+  });
+
+  // market tiles
+  if(r.stats){
+    const st=r.stats; const tiles=[];
+    if(st.market_cap!=null) tiles.push(['Market Cap', compact(st.market_cap), false]);
+    if(st.price_usd!=null) tiles.push(['Price', compact(st.price_usd), false]);
+    if(st.liquidity_usd!=null) tiles.push(['Liquidity', compact(st.liquidity_usd), st.liquidity_usd<5000]);
+    if(st.volume24h!=null) tiles.push(['24h Volume', compact(st.volume24h), false]);
+    if(st.age_hours!=null){ const a=st.age_hours; const txt=a<24?Math.round(a)+'h':Math.round(a/24)+'d'; tiles.push(['Age', txt, a<24]); }
+    if(st.rugcheck_score!=null) tiles.push(['Rugcheck', st.rugcheck_score+'/100', st.rugcheck_score<60]);
+    if(tiles.length){
+      $('#tiles').innerHTML = tiles.map(t=>'<div class="tile'+(t[2]?' danger':'')+'"><div class="tl">'+esc(t[0])+'</div><div class="tv">'+esc(String(t[1]))+'</div></div>').join('');
+      $('#market-panel').style.display='';
+    }
+  }
+
+  // chart
+  const chartCa = r.address || ca;
+  $('#chart-wrap').innerHTML = '<iframe src="https://dexscreener.com/solana/'+encodeURIComponent(chartCa)+'?embed=1&theme=dark&trades=0&info=0" loading="lazy" allow="clipboard-write" referrerpolicy="no-referrer"></iframe>';
+  $('#chart-link').href = 'https://dexscreener.com/solana/'+encodeURIComponent(chartCa);
+  $('#chart-panel').style.display='';
+
+  // lore
+  if(meta && (meta.name || meta.description || meta.image || (meta.socials && Object.keys(meta.socials).length))){
+    const socs = meta.socials || {};
+    let soc='';
+    const sa=(href,icon,label)=>'<a href="'+esc(href)+'" target="_blank" rel="noopener"><svg><use href="#'+icon+'"/></svg> '+label+'</a>';
+    if(socs.twitter) soc+=sa(socs.twitter,'i-x','Twitter');
+    if(socs.telegram) soc+=sa(socs.telegram,'i-tg','Telegram');
+    if(socs.website) soc+=sa(socs.website,'i-globe','Website');
+    if(socs.discord) soc+=sa(socs.discord,'i-discord','Discord');
+    const body =
+      '<div class="lore-top">'+(meta.image?'<img src="'+esc(meta.image)+'" alt="" onerror="this.style.display=\'none\'">':'')+
+      '<div><div class="lore-name">'+esc(meta.name||'Unknown')+'</div>'+(meta.symbol?'<div class="lore-sym">$'+esc(meta.symbol)+'</div>':'')+'</div></div>'+
+      (meta.description?'<div class="lore-desc">'+esc(meta.description)+'</div>':'<div class="lore-desc" style="color:var(--dim)">No lore inscribed on-chain.</div>')+
+      (soc?'<div class="socials">'+soc+'</div>':'');
+    $('#lore-body').innerHTML = body;
+    $('#lore-panel').style.display='';
+  }
+
+  // holders
+  const holders = r.holders || [];
+  if(holders.length){
+    const max=Math.max.apply(null, holders.map(h=>h.pct||0)) || 100;
+    const rows=holders.map((h,i)=>{
+      const pct=(h.pct!=null)?h.pct:0;
+      const w=Math.max(2, Math.round(100*pct/max));
+      const cls=(h.flag==='whale'||h.flag==='insider')?(' '+h.flag):'';
+      return '<div class="holder'+cls+'"><span class="rank">'+(i+1)+'</span>'+
+             '<span class="addr">'+esc(h.label||'—')+'</span>'+
+             '<span class="bar"><i style="width:'+w+'%"></i></span>'+
+             '<span class="pct">'+(h.pct!=null?h.pct+'%':'—')+'</span>'+
+             (h.flag?'<span class="tag">'+esc(h.flag)+'</span>':'')+'</div>';
+    }).join('');
+    $('#holders-body').innerHTML = rows;
+    $('#holders-panel').style.display='';
+  }
+
+  // share buttons
+  $('#open-dex').href = 'https://dexscreener.com/solana/'+encodeURIComponent(chartCa);
+  $('#open-solscan').href = 'https://solscan.io/token/'+encodeURIComponent(chartCa);
+  $('#share-x').addEventListener('click', ()=>{
+    const t = encodeURIComponent('PLEROMA Verdict on '+(name||'this token')+': '+(r.title||'')+' — '+(r.reading||''));
+    const u = encodeURIComponent(window.location.href);
+    window.open('https://x.com/intent/tweet?text='+t+'&url='+u, '_blank', 'width=560,height=440');
+  });
+  $('#copy-link').addEventListener('click', (e)=>{
+    try{ navigator.clipboard.writeText(window.location.href); }catch(_e){}
+    const b=e.currentTarget; const o=b.innerHTML; b.innerHTML='<svg><use href="#i-check"/></svg> Copied ✓';
+    setTimeout(()=>{ b.innerHTML=o; }, 1400);
+  });
+}
+
+load();
+</script>
+</body>
+</html>

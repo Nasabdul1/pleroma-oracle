@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<meta name="ory-verify" content="orynth-2328b8d9596f4e51a20cc00c50eb5282" />
+<meta name="ory-verify" content="orynth-785433c94bfd448fb3c26245cc5d382f" />
 <style>
   :root{
     --bg:#0a0a0a;
@@ -56,6 +56,7 @@
   }
   .btn:hover{transform:translate(-2px,-2px);box-shadow:8px 8px 0 #000}
   .btn:active{transform:translate(3px,3px);box-shadow:2px 2px 0 #000}
+  .btn svg{width:16px;height:16px;flex-shrink:0}
   @media(max-width:760px){.nav-links a:not(.btn){display:none}}
 
   /* ---------- ticker ---------- */
@@ -384,7 +385,7 @@
     </a>
     <nav class="nav-links">
       <a href="#oracle">Oracle</a>
-      <a href="/codex">Codex</a>
+      <a href="/docs">Docs</a>
       <a href="/communion">Communion</a>
       <a class="btn" href="#oracle">Consult →</a>
     </nav>
@@ -465,6 +466,7 @@
           </div>
           <p class="reading" id="v-reading"></p>
           <div class="signals" id="v-signals"></div>
+          <div class="verdict-actions" id="v-actions" style="display:none;margin-top:1rem;padding-top:1rem;border-top:2px dashed var(--gold-deep);display:flex;gap:.7rem;flex-wrap:wrap"></div>
           <div id="v-ca"></div>
           <div id="v-market"></div>
           <div id="v-lore"></div>
@@ -522,9 +524,9 @@
         <p>A truth oracle for crypto. Insight drawn from on-chain reality, spoken plainly — so you see what is real before you commit to it.</p>
       </div>
       <div class="foot-cols">
-        <div class="foot-col"><h4>The Oracle</h4><a href="#oracle">Consult</a><a href="#reveal">What it reveals</a><a href="#doctrine">The rite</a></div>
-        <div class="foot-col"><h4>The Communion</h4><a href="/communion">Enter the broadcast</a><a href="/codex#token">The token</a><a href="/codex#doctrine">Doctrine</a></div>
-        <div class="foot-col"><h4>Connect</h4><a href="https://x.com/Pleroma00" target="_blank" rel="noopener">X / Twitter</a><a href="/codex">Docs</a></div>
+        <div class="foot-col"><h4>The Oracle</h4><a href="#oracle">Consult</a><a href="#reveal">What it reveals</a><a href="#doctrine">The rite</a><a href="/leaderboard">Leaderboard</a><a href="/alerts">Demiurge Alerts</a></div>
+        <div class="foot-col"><h4>The Communion</h4><a href="/communion">Enter the broadcast</a><a href="/docs#token">The token</a><a href="/docs#doctrine">Doctrine</a></div>
+        <div class="foot-col"><h4>Connect</h4><a href="https://x.com/Pleroma00" target="_blank" rel="noopener">X / Twitter</a><a href="/docs">Docs</a></div>
         <a href="https://orynth.dev/projects/pleroma" target="_blank" rel="noopener">
   <img src="https://orynth.dev/api/badge/pleroma?theme=light&style=default" alt="Featured on Orynth" width="260" height="80" />
 </a>
@@ -600,6 +602,23 @@ function render(r){
   }
 
   void verdict.offsetWidth; verdict.classList.add('on'); verdict.scrollIntoView({behavior:'smooth',block:'nearest'});
+  renderVerdictActions(r);
+}
+function renderVerdictActions(r){
+  const wrap=document.getElementById('v-actions');
+  if(!r.address) { wrap.style.display='none'; wrap.innerHTML=''; return; }
+  const base = window.location.origin;
+  const permalink = r.kind==='wallet' ? base+'/wallet/'+r.address : base+'/token/'+r.address;
+  const title = r.title||'';
+  const text = encodeURIComponent(title+' — '+r.reading);
+  const url = encodeURIComponent(permalink);
+  const tweetUrl = 'https://x.com/intent/tweet?text='+text+'&url='+url;
+  wrap.style.display='flex';
+  wrap.innerHTML = '<a class="btn" href="'+permalink+'" target="_blank" rel="noopener"><svg><use href="#i-globe"/></svg> Open Permalink</a>'+
+    '<button class="btn" id="v-share" style="background:var(--bg);color:var(--gold);border-color:var(--gold)"><svg><use href="#i-x"/></svg> Share on X</button>'+
+    '<button class="btn" id="v-card" style="background:var(--bg);color:var(--gold);border-color:var(--gold)"><svg><use href="#i-chart"/></svg> Save Verdict Card</button>';
+  document.getElementById('v-share').addEventListener('click',()=>window.open(tweetUrl,'_blank','width=550,height=420'));
+  document.getElementById('v-card').addEventListener('click',()=>generateVerdictCard(r));
 }
 function socialIcon(kind){
   if(kind==='twitter') return '𝕏';
@@ -710,6 +729,91 @@ function renderExtras(r){
   }
 }
 function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+async function generateVerdictCard(r){
+  const wrap=document.getElementById('v-actions');
+  const btn=wrap.querySelector('#v-card');
+  const original=btn.innerHTML;
+  btn.innerHTML='<svg><use href="#i-chart"/></svg> Generating…';
+  btn.disabled=true;
+  try{
+    const canvas=document.createElement('canvas');
+    canvas.width=1200; canvas.height=630;
+    const ctx=canvas.getContext('2d');
+    // background
+    const bg='#0a0a0a';
+    ctx.fillStyle=bg; ctx.fillRect(0,0,1200,630);
+    // border
+    ctx.strokeStyle='#F4C430'; ctx.lineWidth=6; ctx.strokeRect(3,3,1194,624);
+    // inner accent line
+    ctx.strokeStyle='#C99A1E'; ctx.lineWidth=1; ctx.strokeRect(12,12,1176,606);
+    // emblem area
+    ctx.fillStyle='#141312'; ctx.fillRect(40,40,180,180);
+    ctx.strokeStyle='#F4C430'; ctx.lineWidth=3; ctx.strokeRect(40,40,180,180);
+    // draw simplified eye
+    ctx.strokeStyle='#F4C430'; ctx.lineWidth=3;
+    ctx.beginPath(); ctx.ellipse(130,130,50,30,0,0,2*Math.PI); ctx.stroke();
+    ctx.beginPath(); ctx.arc(130,130,18,0,2*Math.PI); ctx.stroke();
+    ctx.fillStyle='#F4C430'; ctx.beginPath(); ctx.arc(130,130,7,0,2*Math.PI); ctx.fill();
+    // verdict type
+    const v=r.verdict;
+    const verdictColor = v==='emanation'?'#F4C430':v==='illusion'?'#E5484D':'#9d978a';
+    ctx.fillStyle=verdictColor; ctx.font='bold 28px "Space Mono", monospace'; ctx.textAlign='left';
+    ctx.fillText((v==='emanation'?'EMANATION':v==='illusion'?'ILLUSION':'VEILED')+' OF THE '+(v==='illusion'?'DEMIURGE':'FULLNESS'), 250, 90);
+    // clarity
+    ctx.fillStyle='#F2ECDC'; ctx.font='bold 64px "Syne", sans-serif'; ctx.textAlign='left';
+    ctx.fillText((r.clarity||0)+'%', 250, 170);
+    ctx.fillStyle='#9d978a'; ctx.font='14px "Space Mono", monospace'; ctx.fillText('CLARITY', 340, 170);
+    // title
+    ctx.fillStyle='#F2ECDC'; ctx.font='bold 32px "Syne", sans-serif'; ctx.textAlign='left';
+    const title=r.title||'';
+    const maxW=900;
+    let lines=[], line='', words=title.split(' ');
+    for(const w of words){
+      const test=line+w+' ';
+      if(ctx.measureText(test).width>maxW){ lines.push(line); line=w+' '; }
+      else line=test;
+    }
+    lines.push(line);
+    lines.slice(0,2).forEach((l,i)=>ctx.fillText(l, 250, 220+i*40));
+    // reading
+    ctx.fillStyle='#9d978a'; ctx.font='20px "Space Grotesk", sans-serif'; ctx.textAlign='left';
+    const reading=r.reading||'';
+    const rWords=reading.split(' '); line=''; lines=[];
+    for(const w of rWords){
+      const test=line+w+' ';
+      if(ctx.measureText(test).width>maxW){ lines.push(line); line=w+' '; }
+      else line=test;
+    }
+    lines.push(line);
+    lines.slice(0,3).forEach((l,i)=>ctx.fillText(l, 40, 320+i*30));
+    // signals (top 3)
+    const sigs=(r.signals||[]).filter(s=>s.state!=='unknown').slice(0,3);
+    ctx.fillStyle='#F4C430'; ctx.font='bold 14px "Space Mono", monospace'; ctx.fillText('SIGNALS', 40, 430);
+    sigs.forEach((s,i)=>{
+      const y=460+i*35;
+      const c=s.state==='light'?'#F4C430':s.state==='shadow'?'#E5484D':'#9d978a';
+      ctx.fillStyle=c; ctx.beginPath(); ctx.arc(50,y-6,5,0,2*Math.PI); ctx.fill();
+      ctx.fillStyle='#F2ECDC'; ctx.font='16px "Space Grotesk", sans-serif';
+      ctx.fillText(s.name, 70, y);
+      ctx.fillStyle='#9d978a'; ctx.font='13px "Space Mono", monospace';
+      ctx.fillText(s.note, 70, y+18);
+    });
+    // permalink + branding
+    const permalink = r.kind==='wallet' ? window.location.origin+'/wallet/'+r.address : window.location.origin+'/token/'+r.address;
+    ctx.fillStyle='#6f6a5f'; ctx.font='12px "Space Mono", monospace'; ctx.textAlign='right';
+    ctx.fillText('pleroma.fun  •  '+permalink, 1160, 600);
+    // download
+    const link=document.createElement('a');
+    link.download='pleroma-verdict-'+(r.address||'query').slice(0,8)+'.png';
+    link.href=canvas.toDataURL('image/png');
+    link.click();
+    btn.innerHTML=original; btn.disabled=false;
+  }catch(e){
+    btn.innerHTML=original; btn.disabled=false;
+    alert('Failed to generate card');
+  }
+}
 
 // ---- PLEROMA token banner (this token only, server-configured CA) ----
 (function(){

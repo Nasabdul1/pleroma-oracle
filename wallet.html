@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PLEROMA · Wallet Reading</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=Space+Grotesk:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<meta property="og:title" id="og-title" content="PLEROMA · Wallet Reading" />
+<meta property="og:description" id="og-desc" content="The Oracle's reading on this wallet." />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+<style>
+  :root{
+    --bg:#0a0a0a; --panel:#141312; --panel-2:#1c1a17;
+    --gold:#F4C430; --gold-2:#FFD95A; --gold-deep:#C99A1E;
+    --paper:#F2ECDC; --mist:#9d978a; --dim:#6f6a5f;
+    --blood:#E5484D; --ink:#0a0a0a;
+    --bw:3px; --hard:6px 6px 0 #000; --hard-gold:6px 6px 0 var(--gold);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--paper);font-family:'Space Grotesk',system-ui,sans-serif;font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  .wrap{max-width:1140px;margin:0 auto;padding:0 clamp(1.1rem,4vw,2.2rem)}
+  .display{font-family:'Syne',sans-serif;font-weight:800;text-transform:uppercase;line-height:.96;letter-spacing:-.01em}
+  .mono{font-family:'Space Mono',monospace}
+
+  header.nav{position:sticky;top:0;z-index:60;background:var(--bg);border-bottom:var(--bw) solid var(--gold)}
+  .nav-inner{display:flex;align-items:center;justify-content:space-between;height:72px}
+  .brand{display:flex;align-items:center;gap:.7rem;text-decoration:none;color:var(--paper)}
+  .brand .box{width:40px;height:40px;border:var(--bw) solid var(--gold);display:flex;align-items:center;justify-content:center;color:var(--gold);background:var(--bg)}
+  .brand .box svg{width:24px;height:24px}
+  .brand .word{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;letter-spacing:.16em;text-transform:uppercase}
+  .nav-links{display:flex;align-items:center;gap:1.8rem}
+  .nav-links a{color:var(--paper);text-decoration:none;font-weight:500;font-size:.86rem;text-transform:uppercase;letter-spacing:.06em;transition:color .15s}
+  .nav-links a:hover{color:var(--gold)}
+  .btn{display:inline-flex;align-items:center;gap:.5rem;cursor:pointer;text-decoration:none;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.84rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ink);background:var(--gold);border:var(--bw) solid var(--ink);padding:.6rem 1.2rem;box-shadow:var(--hard);transition:transform .12s, box-shadow .12s}
+  .btn:hover{transform:translate(-2px,-2px);box-shadow:8px 8px 0 #000}
+  .btn:active{transform:translate(3px,3px);box-shadow:2px 2px 0 #000}
+  .btn svg{width:16px;height:16px;flex-shrink:0}
+  .btn.ghost{background:var(--bg);color:var(--gold);border-color:var(--gold)}
+  @media(max-width:760px){.nav-links a:not(.btn){display:none}}
+
+  .crumb{font-family:'Space Mono',monospace;font-size:.74rem;color:var(--dim);text-transform:uppercase;letter-spacing:.12em;margin:1.8rem 0 1rem}
+  .crumb a{color:var(--gold);text-decoration:none}
+
+  .loading{display:flex;align-items:center;gap:1rem;padding:3rem 0;color:var(--gold);font-family:'Space Mono',monospace;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+  .loading .blk{width:14px;height:14px;background:var(--gold);animation:blink .9s steps(1) infinite}
+  @keyframes blink{50%{opacity:.2}}
+
+  /* hero */
+  .vhero{margin-top:1rem;background:var(--panel);border:var(--bw) solid var(--gold);box-shadow:var(--hard-gold)}
+  .vhero.illusion{border-color:var(--blood);box-shadow:6px 6px 0 var(--blood)}
+  .vhero.veiled{border-color:var(--mist);box-shadow:6px 6px 0 var(--mist)}
+  .vhero-top{display:flex;align-items:stretch;border-bottom:var(--bw) solid var(--gold)}
+  .vhero.illusion .vhero-top{border-color:var(--blood)}
+  .vhero.veiled .vhero-top{border-color:var(--mist)}
+  .vhero-mark{flex-shrink:0;width:90px;display:flex;align-items:center;justify-content:center;background:var(--gold);color:var(--ink)}
+  .vhero.illusion .vhero-mark{background:var(--blood)}
+  .vhero.veiled .vhero-mark{background:var(--mist)}
+  .vhero-mark svg{width:44px;height:44px}
+  .vhero-body{flex:1;min-width:0;padding:1.2rem 1.4rem}
+  .vhero-eyebrow{font-family:'Space Mono',monospace;font-size:.66rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--mist)}
+  .vhero-addr{font-family:'Syne',sans-serif;font-weight:800;text-transform:uppercase;font-size:clamp(1.4rem,3.6vw,2.2rem);line-height:1.05;color:var(--paper);margin-top:.3rem;word-break:break-all}
+  .vhero-domains{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.6rem}
+  .vhero-domains .chip{font-family:'Space Mono',monospace;font-size:.76rem;color:var(--ink);background:var(--gold);border:2px solid var(--ink);padding:.25rem .6rem;box-shadow:3px 3px 0 #000}
+  .vhero-clarity{flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 1.4rem;border-left:var(--bw) solid var(--gold)}
+  .vhero.illusion .vhero-clarity{border-color:var(--blood)}
+  .vhero.veiled .vhero-clarity{border-color:var(--mist)}
+  .vhero-clarity .num{font-family:'Syne',sans-serif;font-weight:800;font-size:2.8rem;line-height:1;color:var(--gold)}
+  .vhero.illusion .vhero-clarity .num{color:var(--blood)}
+  .vhero.veiled .vhero-clarity .num{color:var(--paper)}
+  .vhero-clarity .cap{font-family:'Space Mono',monospace;font-size:.62rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-top:.3rem}
+  @media(max-width:640px){.vhero-clarity{display:none}.vhero-mark{width:70px}.vhero-mark svg{width:32px;height:32px}}
+
+  .v-kicker{font-family:'Space Mono',monospace;font-size:.66rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--mist);padding:1rem 1.4rem 0}
+  .v-title{font-family:'Syne',sans-serif;font-weight:800;text-transform:uppercase;font-size:clamp(1.6rem,4vw,2.4rem);line-height:1;padding:.3rem 1.4rem 0;color:var(--gold)}
+  .vhero.illusion .v-title{color:var(--blood)}
+  .vhero.veiled .v-title{color:var(--paper)}
+  .reading{padding:1.2rem 1.4rem;color:var(--paper);font-size:1.04rem;line-height:1.7}
+
+  .cabox{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;margin:0 1.4rem 1.4rem;border:var(--bw) solid var(--gold-deep);background:var(--bg);padding:.7rem .9rem}
+  .cabox .calabel{font-family:'Space Mono',monospace;font-size:.62rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+  .cabox .caval{flex:1;min-width:8rem;font-family:'Space Mono',monospace;font-size:.82rem;color:var(--paper);word-break:break-all}
+  .cabox .cacopy{cursor:pointer;font-family:'Space Mono',monospace;font-weight:700;font-size:.7rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ink);background:var(--gold);border:2px solid var(--ink);padding:.35rem .7rem;box-shadow:3px 3px 0 #000}
+  .cabox .cacopy.done{background:var(--paper)}
+
+  .twocol{display:grid;grid-template-columns:1.4fr 1fr;gap:1.6rem;margin-top:2rem}
+  @media(max-width:980px){.twocol{grid-template-columns:1fr}}
+  .col-stack{display:flex;flex-direction:column;gap:1.6rem}
+
+  .panel{background:var(--panel);border:var(--bw) solid var(--gold);box-shadow:var(--hard-gold)}
+  .panel-h{display:flex;align-items:center;justify-content:space-between;gap:.7rem;padding:.7rem 1rem;background:var(--gold);border-bottom:var(--bw) solid var(--ink)}
+  .panel-h .t{font-family:'Space Mono',monospace;font-weight:700;font-size:.74rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink)}
+  .panel-h .x{font-family:'Space Mono',monospace;font-size:.66rem;color:var(--ink);font-weight:700;letter-spacing:.08em}
+  .panel-b{padding:1.2rem}
+
+  /* portfolio */
+  .port-top{display:flex;justify-content:space-between;align-items:baseline;padding:.85rem 1rem;background:var(--gold);color:var(--ink);border:var(--bw) solid var(--gold-deep)}
+  .port-l{font-family:'Space Mono',monospace;font-size:.72rem;text-transform:uppercase;letter-spacing:.14em;font-weight:700}
+  .port-v{font-family:'Syne',sans-serif;font-weight:800;font-size:1.7rem;line-height:1}
+  .port-sol{font-family:'Space Mono',monospace;font-size:.78rem;color:var(--mist);padding:.5rem 0;border-bottom:1px dashed var(--gold-deep);margin-bottom:.7rem}
+  .port-meta{display:flex;gap:1.4rem;font-family:'Space Mono',monospace;font-size:.72rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;padding:.5rem 0 .9rem;border-bottom:1px dashed var(--gold-deep);margin-bottom:.9rem}
+  .port-meta b{color:var(--gold);font-family:'Syne',sans-serif;font-size:.96rem;display:block}
+
+  .grid-tokens{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:.7rem}
+  .tok{border:var(--bw) solid var(--gold-deep);background:var(--bg);padding:.7rem .5rem;text-align:center}
+  .tok img{width:44px;height:44px;border:2px solid var(--gold);object-fit:cover;background:var(--panel);margin-bottom:.5rem}
+  .tok .tk-noimg{width:44px;height:44px;border:2px solid var(--gold-deep);display:flex;align-items:center;justify-content:center;margin:0 auto .5rem;font-family:'Syne',sans-serif;font-weight:800;color:var(--gold-deep);font-size:1rem}
+  .tok .tk-sym{font-family:'Syne',sans-serif;font-weight:700;text-transform:uppercase;font-size:.8rem;color:var(--paper);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tok .tk-amt{font-family:'Space Mono',monospace;font-size:.66rem;color:var(--mist);margin-top:.25rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .tok .tk-val{font-family:'Space Mono',monospace;font-size:.7rem;color:var(--gold);margin-top:.15rem}
+  .port-more{font-family:'Space Mono',monospace;font-size:.7rem;color:var(--dim);padding:.8rem 0 0;text-align:center}
+
+  /* signals */
+  .signals{display:flex;flex-direction:column;gap:.7rem}
+  .signal{display:flex;align-items:flex-start;gap:.85rem;padding:.8rem .95rem;border:var(--bw) solid var(--gold-deep);background:var(--bg)}
+  .signal .sicon{flex-shrink:0;width:24px;height:24px;margin-top:.05rem}
+  .signal .sbody{flex:1;min-width:0}
+  .signal .sname{font-weight:700;font-size:.92rem;text-transform:uppercase;letter-spacing:.02em}
+  .signal .snote{color:var(--mist);font-size:.86rem;margin-top:.15rem;line-height:1.5}
+  .signal .sstate{flex-shrink:0;font-family:'Space Mono',monospace;font-weight:700;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;padding:.3rem .55rem;border:2px solid currentColor;margin-top:.1rem}
+  .s-light{border-color:var(--gold)} .s-light .sicon,.s-light .sstate{color:var(--gold)}
+  .s-shadow{border-color:var(--blood)} .s-shadow .sicon,.s-shadow .sstate{color:var(--blood)}
+  .s-unknown{border-color:var(--mist)} .s-unknown .sicon,.s-unknown .sstate{color:var(--mist)}
+
+  /* scanned images */
+  .wgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(54px,1fr));gap:.5rem}
+  .wimg{aspect-ratio:1;border:2px solid var(--gold-deep);background:var(--panel);overflow:hidden}
+  .wimg img{width:100%;height:100%;object-fit:cover;display:block}
+
+  .ident-note{color:var(--dim);font-size:.78rem;line-height:1.55;font-family:'Space Mono',monospace;margin-top:1rem;padding-top:.9rem;border-top:1px dashed var(--gold-deep)}
+
+  .share{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:1.6rem}
+
+  .fail{margin:3rem 0;padding:2rem;border:var(--bw) solid var(--blood);background:var(--panel)}
+  .fail h2{font-family:'Syne',sans-serif;font-weight:800;text-transform:uppercase;color:var(--blood);font-size:1.6rem;margin-bottom:.6rem}
+  .fail p{color:var(--mist);font-size:1rem;line-height:1.6}
+
+  footer{border-top:var(--bw) solid var(--gold);padding:clamp(2rem,4vw,3rem) 0 2rem;margin-top:clamp(2rem,4vw,3rem);text-align:center;font-family:'Space Mono',monospace;font-size:.76rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em}
+  footer a{color:var(--gold);text-decoration:none;margin:0 .6rem}
+  footer a:hover{text-decoration:underline}
+  a:focus-visible,button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+  @media(prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-eye" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 24s8-13 21-13 21 13 21 13-8 13-21 13S3 24 3 24Z"/><circle cx="24" cy="24" r="7"/><circle cx="24" cy="24" r="2.6" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-check" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M13 24.5 21 32l14-15"/></symbol>
+    <symbol id="i-cross" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 15 33 33M33 15 15 33"/></symbol>
+    <symbol id="i-veil" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M24 13v22M13 24h22" opacity=".5"/><circle cx="24" cy="24" r="14" stroke-dasharray="4 5"/></symbol>
+    <symbol id="i-hand" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 24v-9a3 3 0 0 1 6 0v7M20 22v-3a3 3 0 0 1 6 0v3M26 22a3 3 0 0 1 6 0v9c0 6-4 11-11 11s-11-4-13-10l-2-6a3 3 0 0 1 5-2l3 4"/><circle cx="21" cy="14" r="3"/></symbol>
+    <symbol id="i-seal" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="11" y="21" width="26" height="20" rx="1"/><path d="M16 21v-5a8 8 0 0 1 16 0v5"/><circle cx="24" cy="30" r="2.4"/><path d="M24 32.4V36"/></symbol>
+    <symbol id="i-serpent" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 14c6 0 6 8 12 8s6-8 12-8 8 4 8 10-4 12-10 12"/><path d="M10 36c-1.5-1.5-2-3.5-2-5"/><circle cx="10" cy="11.5" r="1.8" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-vesica" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="18" cy="24" r="13"/><circle cx="30" cy="24" r="13"/><circle cx="24" cy="24" r="13" opacity=".5"/></symbol>
+    <symbol id="i-ouroboros" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M24 6a18 18 0 1 1-9 33.5"/><path d="m13 33 2.5 7.5L23 38"/><circle cx="24" cy="6" r="2.4" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.66l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231 5.45-6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77Z"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18"/></symbol>
+    <symbol id="i-scan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.3-4.3"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-wallet" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12h32a4 4 0 0 1 4 4v22a4 4 0 0 1-4 4H10a4 4 0 0 1-4-4V12Z"/><path d="M6 12V8a2 2 0 0 1 2-2h26v6"/><circle cx="34" cy="27" r="3" fill="currentColor" stroke="none"/></symbol>
+  </defs>
+</svg>
+
+<header class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="/"><span class="box"><svg><use href="#i-eye"/></svg></span><span class="word">Pleroma</span></a>
+    <nav class="nav-links">
+      <a href="/">Oracle</a>
+      <a href="/leaderboard">Leaderboard</a>
+      <a href="/alerts">Alerts</a>
+      <a href="/docs">Docs</a>
+      <a class="btn" href="/">Consult →</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="crumb"><a href="/">Oracle</a> &nbsp;›&nbsp; <span>Wallet</span> &nbsp;›&nbsp; <span id="crumb-addr" class="mono"></span></div>
+
+  <div id="loading" class="loading"><span class="blk"></span><span>The Oracle is reading the wallet…</span></div>
+
+  <div id="fail" class="fail" style="display:none">
+    <h2>The Veil Holds</h2>
+    <p id="fail-msg">This address could not be read.</p>
+    <a class="btn" href="/" style="margin-top:1.2rem"><svg><use href="#i-arrow"/></svg> Return to the Oracle</a>
+  </div>
+
+  <article id="content" style="display:none">
+    <section class="vhero" id="vhero">
+      <div class="vhero-top">
+        <div class="vhero-mark"><svg id="v-mark"><use href="#i-check"/></svg></div>
+        <div class="vhero-body">
+          <div class="vhero-eyebrow">Wallet</div>
+          <div class="vhero-addr" id="v-addr">—</div>
+          <div class="vhero-domains" id="v-domains"></div>
+        </div>
+        <div class="vhero-clarity"><div class="num" id="v-clarity">—</div><div class="cap">Clarity</div></div>
+      </div>
+      <div class="v-kicker">The Oracle has spoken</div>
+      <div class="v-title" id="v-title">—</div>
+      <p class="reading" id="v-reading"></p>
+      <div class="cabox"><span class="calabel">Wallet</span><span class="caval" id="v-ca"></span><button class="cacopy" id="v-copy">Copy</button></div>
+    </section>
+
+    <div class="twocol">
+      <div class="col-stack">
+        <section class="panel" id="port-panel" style="display:none">
+          <div class="panel-h"><span class="t">Portfolio</span><span class="x" id="port-x">Live</span></div>
+          <div class="panel-b" id="port-body"></div>
+        </section>
+
+        <section class="panel" id="signals-panel">
+          <div class="panel-h"><span class="t">The Signals</span><span class="x">Verified</span></div>
+          <div class="panel-b"><div id="signals" class="signals"></div></div>
+        </section>
+      </div>
+
+      <div class="col-stack">
+        <section class="panel" id="imgs-panel" style="display:none">
+          <div class="panel-h"><span class="t">Scanned Holdings</span><span class="x" id="imgs-x"></span></div>
+          <div class="panel-b"><div class="wgrid" id="imgs-grid"></div></div>
+        </section>
+      </div>
+    </div>
+
+    <div class="share">
+      <button class="btn" id="share-x"><svg><use href="#i-x"/></svg> Share on X</button>
+      <button class="btn ghost" id="copy-link"><svg><use href="#i-share"/></svg> Copy Permalink</button>
+      <a class="btn ghost" id="open-solscan" href="#" target="_blank" rel="noopener"><svg><use href="#i-scan"/></svg> Solscan</a>
+    </div>
+  </article>
+</main>
+
+<footer>
+  <a href="/">Oracle</a>·<a href="/leaderboard">Leaderboard</a>·<a href="/alerts">Alerts</a>·<a href="/docs">Docs</a>·<a href="/communion">Communion</a>
+  <div style="margin-top:.8rem">© 2026 Pleroma · Insight, not financial advice</div>
+</footer>
+
+<script>
+const $ = s => document.querySelector(s);
+const ICONS={holders:'i-hand',liquidity:'i-seal',deployer:'i-serpent',hype:'i-veil',origin:'i-vesica',snare:'i-ouroboros',veil:'i-veil'};
+function esc(s){const d=document.createElement('div');d.textContent=s==null?'':String(s);return d.innerHTML;}
+function fmtUSD(n){return n==null?'—':'$'+Number(n).toLocaleString(undefined,{maximumFractionDigits:2});}
+function shorten(a){return a?a.slice(0,6)+'…'+a.slice(-6):'—';}
+
+const path = window.location.pathname.replace(/\/+$/,'');
+const addr = path.split('/').pop();
+
+function fail(msg){
+  $('#loading').style.display='none';
+  $('#fail').style.display='block';
+  $('#fail-msg').textContent = msg || 'This address could not be read.';
+}
+
+async function load(){
+  if(!addr || addr.length < 32){ fail('No wallet address in the URL.'); return; }
+  $('#crumb-addr').textContent = shorten(addr);
+  try{
+    const res = await fetch('/api/wallet/'+encodeURIComponent(addr));
+    if(res.status === 404){ fail('This address is not a wallet, or no account exists for it.'); return; }
+    if(!res.ok){ fail('The Oracle channel is clouded. Try again shortly.'); return; }
+    const d = await res.json();
+    render(d);
+  }catch(e){ fail('Could not reach the Oracle: '+(e.message||'unknown')); }
+}
+
+function render(r){
+  $('#loading').style.display='none';
+  $('#content').style.display='block';
+
+  const v = ['emanation','illusion','veiled'].includes(r.verdict) ? r.verdict : 'veiled';
+  const hero = $('#vhero'); hero.className = 'vhero ' + v;
+  $('#v-mark').innerHTML = '<use href="#' + (v==='emanation'?'i-check':v==='illusion'?'i-cross':'i-veil') + '"/>';
+
+  const id = r.identity || {};
+  const a = r.address || addr;
+  const headline = (id.sol_domains && id.sol_domains[0]) || shorten(a);
+  $('#v-addr').textContent = headline;
+
+  // domains chips
+  const dWrap = $('#v-domains'); dWrap.innerHTML='';
+  (id.sol_domains||[]).forEach(d=>{
+    const c = document.createElement('span'); c.className='chip'; c.textContent = d;
+    dWrap.appendChild(c);
+  });
+
+  $('#v-clarity').textContent = (typeof r.clarity === 'number') ? r.clarity : '—';
+  $('#v-title').textContent = r.title || (v==='emanation'?'EMANATION OF THE FULLNESS':v==='illusion'?'ILLUSION OF THE DEMIURGE':'VEILED IN SHADOW');
+  $('#v-reading').textContent = r.reading || '';
+  $('#v-ca').textContent = a;
+
+  const copyBtn = $('#v-copy');
+  copyBtn.addEventListener('click', ()=>{
+    try{ navigator.clipboard.writeText(a); }catch(e){}
+    copyBtn.textContent='Copied ✓'; copyBtn.classList.add('done');
+    setTimeout(()=>{ copyBtn.textContent='Copy'; copyBtn.classList.remove('done'); },1400);
+  });
+
+  document.title = headline + ' · PLEROMA Wallet Reading';
+  $('#og-title').setAttribute('content', headline + ' · ' + (r.title||'PLEROMA Wallet Reading'));
+  if(r.reading) $('#og-desc').setAttribute('content', r.reading);
+
+  // signals
+  const sigWrap = $('#signals'); sigWrap.innerHTML='';
+  (r.signals||[]).forEach(s=>{
+    const state = ['light','shadow','unknown'].includes(s.state)?s.state:'unknown';
+    const icon = ICONS[s.icon] || 'i-veil';
+    const row = document.createElement('div'); row.className='signal s-'+state;
+    row.innerHTML='<svg class="sicon"><use href="#'+icon+'"/></svg><div class="sbody"><div class="sname">'+esc(s.name||'')+'</div><div class="snote">'+esc(s.note||'')+'</div></div><span class="sstate">'+(state==='light'?'Light':state==='shadow'?'Shadow':'Veiled')+'</span>';
+    sigWrap.appendChild(row);
+  });
+
+  // portfolio
+  if(id.total_usd != null || (id.tokens && id.tokens.length)){
+    const tokens = id.tokens || [];
+    let tiles = '';
+    tokens.forEach(t=>{
+      const amt = Number(t.amount||0).toLocaleString(undefined,{maximumFractionDigits:4});
+      const sym = esc(t.symbol||'—');
+      const img = t.image
+        ? '<img src="'+esc(t.image)+'" alt="" onerror="this.outerHTML=\'<div class=&quot;tk-noimg&quot;>'+sym.slice(0,2)+'</div>\'">'
+        : '<div class="tk-noimg">'+sym.slice(0,2)+'</div>';
+      tiles += '<div class="tok">'+img+'<div class="tk-sym">'+sym+'</div>'+
+               '<div class="tk-amt">'+esc(amt)+'</div>'+
+               (t.usd!=null?'<div class="tk-val">'+fmtUSD(t.usd)+'</div>':'')+'</div>';
+    });
+    const more = (id.token_count && id.token_count > tokens.length)
+      ? '<div class="port-more">+ '+(id.token_count - tokens.length)+' more holdings</div>'
+      : '';
+    const meta = [];
+    if(id.token_count != null) meta.push('<div>Tokens<b>'+id.token_count+'</b></div>');
+    if(id.age_days != null) meta.push('<div>Age<b>'+id.age_days+'d</b></div>');
+    if(id.sol_balance != null) meta.push('<div>SOL<b>'+esc(String(id.sol_balance))+'</b></div>');
+    $('#port-body').innerHTML =
+      '<div class="port-top"><span class="port-l">Wallet worth</span><span class="port-v">'+fmtUSD(id.total_usd)+'</span></div>'+
+      (id.sol_usd!=null?'<div class="port-sol">SOL · '+esc(String(id.sol_balance))+' (~'+fmtUSD(id.sol_usd)+')</div>':'')+
+      (meta.length?'<div class="port-meta">'+meta.join('')+'</div>':'')+
+      (tiles?'<div class="grid-tokens">'+tiles+'</div>':'<div class="port-sol" style="text-align:center">No priced token holdings found.</div>')+
+      more+
+      (id.note?'<div class="ident-note">'+esc(id.note)+'</div>':'');
+    $('#port-panel').style.display='';
+  }
+
+  // scanned holdings images
+  const imgs = (id.images || []).filter(Boolean);
+  if(imgs.length){
+    $('#imgs-grid').innerHTML = imgs.map(u=>'<div class="wimg"><img src="'+esc(u)+'" loading="lazy" onerror="this.parentNode.style.display=\'none\'"></div>').join('');
+    $('#imgs-x').textContent = imgs.length + ' shown';
+    $('#imgs-panel').style.display='';
+  }
+
+  // share
+  $('#open-solscan').href = 'https://solscan.io/account/'+encodeURIComponent(a);
+  $('#share-x').addEventListener('click', ()=>{
+    const t = encodeURIComponent('PLEROMA Wallet Reading · '+headline+' — '+(r.title||'')+'. '+(r.reading||''));
+    const u = encodeURIComponent(window.location.href);
+    window.open('https://x.com/intent/tweet?text='+t+'&url='+u, '_blank', 'width=560,height=440');
+  });
+  $('#copy-link').addEventListener('click', (e)=>{
+    try{ navigator.clipboard.writeText(window.location.href); }catch(_e){}
+    const b=e.currentTarget; const o=b.innerHTML; b.innerHTML='<svg><use href="#i-check"/></svg> Copied ✓';
+    setTimeout(()=>{ b.innerHTML=o; }, 1400);
+  });
+}
+
+load();
+</script>
+</body>
+</html>
