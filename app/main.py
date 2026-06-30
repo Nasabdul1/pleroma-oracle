@@ -91,6 +91,17 @@ async def home():
     return _serve("pleroma.html")
 
 
+@app.get("/favicon.svg", include_in_schema=False)
+async def favicon_svg():
+    return _serve("favicon.svg")
+
+
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon_ico():
+    """Browsers that don't ask for /favicon.svg still hit /favicon.ico — serve the SVG either way."""
+    return _serve("favicon.svg")
+
+
 @app.get("/docs", include_in_schema=False)
 async def docs_page():
     """The Docs — how the tool works, the six veils, verdicts, lore, pages, API, FAQ."""

@@ -1,0 +1,13 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- PLEROMA — Seal of the Fullness (favicon mark, optimized for 16-32px) -->
+  <rect width="64" height="64" rx="6" fill="#0a0a0a"/>
+  <rect x="3" y="3" width="58" height="58" rx="4" fill="none" stroke="#F4C430" stroke-width="2.5"/>
+  <g transform="translate(32,32)">
+    <!-- vesica eye outline -->
+    <path d="M-22 0 Q0 -16 22 0 Q0 16 -22 0 Z" fill="none" stroke="#F4C430" stroke-width="2.6"/>
+    <!-- iris -->
+    <circle r="10" fill="none" stroke="#F4C430" stroke-width="2.2"/>
+    <!-- monad pupil -->
+    <circle r="4.2" fill="#F4C430"/>
+  </g>
+</svg>
